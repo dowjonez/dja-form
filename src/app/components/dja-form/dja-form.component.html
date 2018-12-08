@@ -1,0 +1,60 @@
+<form [formGroup]="formGroup">
+    <input type="text" formControlName="firstName" placeholder="First Name" />
+    <ng-container *ngIf="(fNameCtrl.dirty || fNameCtrl.touched) && fNameCtrl.hasError() ">
+        *required {{fNameCtrl.hasError()}}
+    </ng-container>
+    <br/>
+
+
+    <input type="text" formControlName="lastName" placeholder="Last Name" />
+    <ng-container *ngIf="(lNameCtrl.dirty || lNameCtrl.touched) && !lNameCtrl.valid">
+        *required
+    </ng-container>
+    <br/>
+
+
+    <ng-container formGroupName="contact_methods">
+        <input type="email" formControlName="email" placeholder="Email Address" /><br/>
+        <input type="tel" formControlName="phone" placeholder="Telephone Number" /><br/>
+    </ng-container>
+    <br/>
+
+
+    <label>
+        Languages Spoken 
+          <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
+              <br/> 
+            <input type="checkbox" value="0" formControlName="{{item | lowercase}}"/>{{item}}
+          </ng-container>
+    </label>
+    <br/>
+    <br/>
+    <br/>
+
+
+    <label>
+      Country
+      <br />
+      <select formControlName="country">
+        <ng-container *ngFor="let item of countries" >
+          <option value="{{item}}">{{item}}</option>
+        </ng-container>
+      </select>
+    </label>
+    <br/>
+    <br/>
+    <br/>
+
+
+    <label>
+        Video
+        <br />
+        <input id="video" type="file" formControlName="video" (change)="videoChanged($e)"/>
+    </label>
+    <br/>
+    <br/>
+    <br/>
+
+
+    <div (click)="processForm($event)">SUBMIT</div>
+</form>
