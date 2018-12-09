@@ -46,7 +46,7 @@ export class DjaFormComponent implements OnInit {
   }
 
   processForm(e){
-   this.s3.postFile( document.getElementById("video")['files'][0]); 
+   this.s3.putObject( document.getElementById("video")['files'][0]); 
   }
   
   makeForm( ) : FormGroup{

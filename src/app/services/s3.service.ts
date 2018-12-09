@@ -26,14 +26,6 @@ export class S3Service {
       credentials: creds
     });
 
-    AWS.config.getCredentials( err => {
-      debugger  
-    } )
-
-   
-
-    console.log(AWS.config.credentials);
-
     this.s3 = new AWS.S3({
       apiVersion: '2006-03-01',
       params: {Bucket:this.aws_bucket}
@@ -41,12 +33,12 @@ export class S3Service {
   }
 
 
-  public postFile( file ){
+  public putObject( file ){
       let params = {
         Bucket: this.aws_bucket, 
         Key: file.name, 
         Body: file,
-        ACL: 'private-read',
+        ACL: 'private',
         ContentType: file.mimetype
       };
       
