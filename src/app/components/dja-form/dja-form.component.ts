@@ -6,6 +6,7 @@ import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
 import { S3Service } from 'src/app/services/s3.service';
+import { DynamoService } from '../../services/dynamoDb.service';
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
@@ -15,7 +16,7 @@ import { S3Service } from 'src/app/services/s3.service';
 export class DjaFormComponent implements OnInit {
   private countries: Array<string>;
   private languages: Array<string>;
-  
+
   private formGroup :     FormGroup;
   private fNameCtrl :     AbstractControl;
   private lNameCtrl :     AbstractControl;
@@ -25,41 +26,49 @@ export class DjaFormComponent implements OnInit {
   private countryCtrl :   AbstractControl;
 
 
-  constructor( private APP_SETTINGS : AppInternalSettings , private fb : FormBuilder, private s3 : S3Service) { 
+  constructor(
+      private APP_SETTINGS : AppInternalSettings ,
+      private fb : FormBuilder,
+      private s3 : S3Service,
+      private db: DynamoService
+    ){
     this.formGroup      = this.makeForm();
-    this.countries      = this.APP_SETTINGS.settings.COUNTRIES;
-    this.languages      = this.APP_SETTINGS.settings.LANGUAGES;
-    this.fNameCtrl      = this.formGroup.controls.firstName;
-    this.lNameCtrl      = this.formGroup.controls.firstName;
-    this.emailCtrl      = this.formGroup.controls.firstName;
-    this.phoneCtrl      = this.formGroup.controls.firstName;
-    this.languageCtrl   = this.formGroup.controls.firstName;
-    this.countryCtrl    = this.formGroup.controls.firstName;
+      this.countries      = this.APP_SETTINGS.settings.COUNTRIES;
+      this.languages      = this.APP_SETTINGS.settings.LANGUAGES;
+      this.fNameCtrl      = this.formGroup.controls.firstName;
+      this.lNameCtrl      = this.formGroup.controls.firstName;
+      this.emailCtrl      = this.formGroup.controls.firstName;
+      this.phoneCtrl      = this.formGroup.controls.firstName;
+      this.languageCtrl   = this.formGroup.controls.firstName;
+      this.countryCtrl    = this.formGroup.controls.firstName;
   }
 
   ngOnInit() {
-    
+
   }
-  
+
   videoChanged($e){
 
   }
 
   processForm(e){
-   this.s3.putObject( document.getElementById("video")['files'][0]); 
+   //this.s3.putObject( document.getElementById("video")['files'][0]);
+    this.db.putItem({
+      test: 'test22Bis'
+    }, 'submission-entry');
   }
-  
+
   makeForm( ) : FormGroup{
 
     return this.fb.group({
       firstName: [
-        '', 
+        '',
         [Validators.required,
         Validators.minLength(2),
         Validators.maxLength(20)]
       ],
       lastName:[
-        '', 
+        '',
         [Validators.required,
         Validators.minLength(2),
         Validators.maxLength(20)]
@@ -67,13 +76,13 @@ export class DjaFormComponent implements OnInit {
       country: ['' , Validators.required],
       contact_methods: this.fb.group({
         email: ['', Validators.compose([
-          Validators.required, 
+          Validators.required,
           Validators.email
         ])],
         phone: ['',Validators.compose([
           Validators.required
           //TODO - SET VALIDATOR FOR TELPHONE - Validators.pattern( ::: regex :::)
-       ])], 
+       ])],
         whats_app: ["", Validators.required],
         other: [""]
       }),
@@ -84,7 +93,7 @@ export class DjaFormComponent implements OnInit {
         other: ['']
       },
       Validators.required),
-      video: ["", Validators.required] 
+      video: ["", Validators.required]
     })
   }
 }
