@@ -2,12 +2,6 @@ export interface Language {
     language: string;
     specify?: string; //becomes required if language === "Other"
 }
-  ​
-
-export interface Language {
-    language: string;
-    specify?: string; //becomes required if language === "Other"
-}
 
 export interface Languages {
     primary: Language;
@@ -52,6 +46,8 @@ export interface SubmissionEntry {
     valid_passport: boolean; //would rephrase the question: Do you own a valid passport issued by your country? 
     travel_restriction: TravelRestriction;
     contact_points: ContactPoints;
+    user_id?: string;
+    video_uri?: string;
 }
 
 export interface Entry extends SubmissionEntry {

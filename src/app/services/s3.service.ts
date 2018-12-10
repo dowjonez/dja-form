@@ -38,7 +38,6 @@ export class S3Service {
         Bucket: this.aws_bucket, 
         Key: file.name, 
         Body: file,
-        ACL: 'private',
         ContentType: file.mimetype
       };
       

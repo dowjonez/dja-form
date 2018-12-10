@@ -41,6 +41,10 @@
         </ng-container>
       </select>
     </label>
+
+    <ng-container *ngIf="countryCtrl.value == 'Other'" formGroupName="country">
+        <input type="text" formControlName="otherCountry" placeholder="Other Country" /><br/>
+    </ng-container>
     <br/>
     <br/>
     <br/>
