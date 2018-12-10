@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as AWS from 'aws-sdk';
 import { Observable } from 'rxjs';
-import { UUID } from 'angular2-uuid'; // use a third-party library or custom logic for generating the GUIDs of the newly created items
+import { AWSService } from './aws.service';
+import { EventInteraction } from './event.interaction.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,42 +13,45 @@ export class DynamoService {
   private params = {
     TableName: 'submission-entry'
   };
-  public tableName = 'submission-entry';
-  public tableRegion = 'us-east-1';
 
-  public IdentityPoolId = 'us-east-1:72e65e24-58b0-4d99-baa5-e35acdeb6d78';
+  constructor(
+    private awsService: AWSService,
+    public interactionPipe: EventInteraction
+  ) {
+  }
 
-  constructor() {
-    const creds: AWS.CognitoIdentityCredentials =  new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: this.IdentityPoolId
-    });
 
-      // Initialize the Amazon Cognito credentials provider
-      AWS.config.update({
-        region: this.tableRegion,
-        credentials: creds
-      });
-
+  public putTableEntry (pool: string, region: string, key: string, item: any, table_name: string) {
+    this.clearConfiguration();
+    this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
     this.documentClient = new AWS.DynamoDB.DocumentClient();
+    this.putItem (key, item, table_name);
   }
 
-  private newId() {
-    return UUID.UUID();
+  private clearConfiguration() {
+    if (this.dynamodb) {
+      this.dynamodb = null;
+      this.documentClient = null;
+    }
   }
 
-  public putItem (item: any, table_name: string) {
-    item['id'] = UUID.UUID();
+  // generic, should be used directly only in special cases
+  private putItem (key: string, item: any, table_name: string) {
+    item['id'] = key;
 
     const params = {
       TableName: table_name,
       Item: item
     };
+    const self = this;
     this.documentClient.put(params, function(err, data) {
       if (err) {
         console.log('Error', err);
+        self.interactionPipe.next( { key: 'submissionComplete', message: 'error' } );
       } else {
         console.log('Success', data);
+        self.interactionPipe.next( { key: 'submissionComplete', message: 'success' } );
       }
     });
   }

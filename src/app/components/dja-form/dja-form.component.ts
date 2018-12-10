@@ -1,21 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import * as model from 'src/core.model';
 import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
-import { S3Service } from 'src/app/services/s3.service';
-import { DynamoService } from '../../services/dynamoDb.service';
+import { EventInteraction } from '../../services/event.interaction.service';
+import { AWSEngine } from '../../services/aws.engine';
+import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
   styleUrls: ['./dja-form.component.scss'],
-  providers: [ AppInternalSettings, FormBuilder, S3Service  ]
+  providers: [ FormBuilder  ]
 })
-export class DjaFormComponent implements OnInit {
+export class DjaFormComponent implements OnInit, OnDestroy {
   private countries: Array<string>;
   private languages: Array<string>;
+
+  private subscription: Subscription;
 
   private formGroup :     FormGroup;
   private fNameCtrl :     AbstractControl;
@@ -28,11 +32,22 @@ export class DjaFormComponent implements OnInit {
 
   constructor(
       private APP_SETTINGS : AppInternalSettings ,
-      private fb : FormBuilder,
-      private s3 : S3Service,
-      private db: DynamoService
-    ){
-    this.formGroup      = this.makeForm();
+      private fb: FormBuilder,
+      public interactionPipe: EventInteraction,
+      private awsPipe: AWSEngine
+    ) {
+      const self = this;
+      this.subscription = this.interactionPipe.subscribe(e => {
+        if (e.key === 'submissionComplete') {
+            if (e.message) {
+              // tell the user that everything is peachy
+            }
+            else{
+              // tell the user to try again, maybe?
+            }
+        }
+      });
+      this.formGroup      = this.makeForm();
       this.countries      = this.APP_SETTINGS.settings.COUNTRIES;
       this.languages      = this.APP_SETTINGS.settings.LANGUAGES;
       this.fNameCtrl      = this.formGroup.controls.firstName;
@@ -47,15 +62,21 @@ export class DjaFormComponent implements OnInit {
 
   }
 
-  videoChanged($e){
+  videoChanged($e) {
 
   }
 
-  processForm(e){
-   //this.s3.putObject( document.getElementById("video")['files'][0]);
-    this.db.putItem({
-      test: 'test22Bis'
-    }, 'submission-entry');
+  processForm(e) {
+    this.awsPipe.submitMediaEntry(
+      this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+      this.APP_SETTINGS.settings.REGION,
+      this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
+      document.getElementById('video')['files'][0],
+      {
+            test: 'test12102'
+      },
+      'submission-entry'
+    );
   }
 
   makeForm( ) : FormGroup{
@@ -95,5 +116,12 @@ export class DjaFormComponent implements OnInit {
       Validators.required),
       video: ["", Validators.required]
     })
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
   }
 }

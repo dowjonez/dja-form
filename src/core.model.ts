@@ -52,6 +52,9 @@ export interface SubmissionEntry {
     valid_passport: boolean; // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction: TravelRestriction;
     contact_points: ContactPoints;
+    user_id?: string;
+    video_uri?: string;
+    video_s3_key?: string;
     status: EntryStatus;
     status_history?: EntryStatusTrail; // this is just the management history for a superuser
 }
