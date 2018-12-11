@@ -28,8 +28,8 @@ export class S3Service {
         Bucket: bucket,
         Key: key,
         Body: file,
-        ACL: 'private',
-        ContentType: file.mimetype
+        ACL: 'private', // NOT SURE IS NEEDED
+        ContentType: file.mimetype // NOT SURE IS NEEDED
       };
 
       this.put(pool, region, params, item, table_name);
@@ -58,12 +58,23 @@ export class S3Service {
 
   private put(pool: string, region: string, params, item: any, table_name: string) {
     const self = this;
-    this.s3.putObject(params, function( err, data ) {
+    // THIS ERRORS !!!
+    this.s3.upload(params, function( err, data: AWS.S3.ManagedUpload.SendData ) {
       if (err) {
         console.log('Error', err);
       } else {
         console.log('Success', data);
-        self.getSignedUrl(pool, region, params.Key, params.Bucket, item, table_name);
+        const interactionMessage = {
+          uri: data.Location,
+          pool: pool,
+          region: region,
+          key: params.Key,
+          item: item,
+          tableName: table_name
+        };
+        self.interactionPipe.next( { key: 'videoAccepted', message: interactionMessage } );
+        // the WRONG old way commented out below
+        // self.getSignedUrl(pool, region, params.Key, params.Bucket, item, table_name);
       }
     });
   }
