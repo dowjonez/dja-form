@@ -53,7 +53,7 @@ export class AWSEngine {
     pool: string, region: string, bucket: string, file: any, item: any, table_name: string
   ) {
     this.getCredentials(region, pool);
-    const S3BucketKey = this.newId();
+    const S3BucketKey = encodeURIComponent(this.newId() +  file.name);
     this.s3.putObject(S3BucketKey, pool, region, bucket, file, item, table_name);
   }
 

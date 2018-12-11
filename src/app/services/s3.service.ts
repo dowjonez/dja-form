@@ -29,7 +29,7 @@ export class S3Service {
         Key: key,
         Body: file,
         ACL: 'private', // NOT SURE IS NEEDED
-        ContentType: file.mimetype // NOT SURE IS NEEDED
+        ContentType: file.type // NOT SURE IS NEEDED
       };
 
       this.put(pool, region, params, item, table_name);
