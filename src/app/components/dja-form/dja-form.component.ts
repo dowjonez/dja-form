@@ -1,24 +1,28 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import * as model from 'src/core.model';
 import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
-import { S3Service } from 'src/app/services/s3.service';
-import { DynamoService } from '../../services/dynamoDb.service';
 import { AbstractControlStatus } from '@angular/forms/src/directives/ng_control_status';
+import { EventInteraction } from '../../services/event.interaction.service';
+import { AWSEngine } from '../../services/aws.engine';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
   styleUrls: ['./dja-form.component.scss'],
-  providers: [AppInternalSettings, FormBuilder, S3Service]
+  providers: [AppInternalSettings, FormBuilder]
 })
 export class DjaFormComponent implements OnInit {
   @ViewChild('video') video:  ElementRef;
   private countries: Array<string>;
   private languages: Array<string>;
+ 
 
+  private subscription: Subscription;
   private formGroup: FormGroup;
   private fNameCtrl: AbstractControl;
   private lNameCtrl: AbstractControl;
@@ -32,11 +36,22 @@ export class DjaFormComponent implements OnInit {
   private otherSecondaryLanguage: Boolean;
   private controls: Array<string>;
   constructor(
-    private APP_SETTINGS: AppInternalSettings,
+    private APP_SETTINGS : AppInternalSettings ,
     private fb: FormBuilder,
-    private s3: S3Service,
-    private db: DynamoService
-  ) {
+    public interactionPipe: EventInteraction,
+    private awsPipe: AWSEngine
+    ) {
+    const self = this;
+    this.subscription = this.interactionPipe.subscribe(e => {
+      if (e.key === 'submissionComplete') {
+          if (e.message) {
+            // tell the user that everything is peachy
+          }
+          else{
+            // tell the user to try again, maybe?
+          }
+      }
+    });
     this.formGroup = this.makeForm();
     this.countries = this.APP_SETTINGS.settings.COUNTRIES;
     this.languages = this.APP_SETTINGS.settings.LANGUAGES;
@@ -79,18 +94,21 @@ export class DjaFormComponent implements OnInit {
 
   }
 
-
-  processForm(e) {
-    //this.s3.putObject( document.getElementById("video")['files'][0]);
-    //this.db.putItem({
-    //  test: 'test22Bis'
-    //}, 'submission-entry');
-
+  videoChanged($e) {
 
   }
 
-  ValidateLanguages(control: AbstractControl) {
-    return false
+  processForm(e) {
+    this.awsPipe.submitMediaEntry(
+      this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+      this.APP_SETTINGS.settings.REGION,
+      this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
+      document.getElementById('video')['files'][0],
+      {
+            test: 'test12102'
+      },
+      'submission-entry'
+    );
   }
   
   getExtension(filename) {
@@ -171,7 +189,7 @@ export class DjaFormComponent implements OnInit {
         email: [null, Validators.compose([Validators.required, Validators.email])],
         phone: [null, Validators.compose([Validators.required])],
           //TODO - SET VALIDATOR FOR TELPHONE - Validators.pattern( ::: regex ::: )
-        whats_app: [null],
+        whats_app: [null, Validators.required],
         other: [null]
       }),
       languages: this.fb.group({
@@ -187,5 +205,12 @@ export class DjaFormComponent implements OnInit {
       passport: [false],
       video: [null]
     })
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
   }
 }
