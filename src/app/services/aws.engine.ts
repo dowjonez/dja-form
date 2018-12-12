@@ -24,7 +24,7 @@ export class AWSEngine {
     this.subscription = this.interactionPipe.subscribe(e => {
       if (e.key === 'videoAccepted') {
           console.log(e.message);
-          const ddbKey = this.newId();
+          const ddbKey = e.message.item['id'] ? e.message.item['id'] : this.newId();
           e.message.item['video_uri'] = e.message.uri;
           e.message.item['video_s3_key'] = e.message.key;
           if (self.identityId) {
@@ -55,6 +55,24 @@ export class AWSEngine {
     this.getCredentials(region, pool);
     const S3BucketKey = encodeURIComponent(this.newId() +  file.name);
     this.s3.putObject(S3BucketKey, pool, region, bucket, file, item, table_name);
+  }
+
+  public getTableEntry (pool: string, region: string, key: string, table_name: string) {
+    // f4d1048a-125b-0dda-0e63-55efa9c19cd7
+    this.db.getTableEntry(pool, region, key, table_name);
+  }
+
+  public getEntireTable (pool: string, region: string,  table_name: string) {
+    // f4d1048a-125b-0dda-0e63-55efa9c19cd7
+    this.db.getEntireTable(pool, region, table_name);
+  }
+
+  public deleteTableItem(pool: string, region: string, key: string, table_name: string) {
+    this.db.deleteTableItem(pool, region, key, table_name);
+  }
+
+  public putTableEntry (pool: string, region: string, key: string, item: any, table_name: string) {
+    this.db.putTableEntry(pool, region, key, item, table_name);
   }
 
 }

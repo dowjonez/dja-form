@@ -99,13 +99,41 @@ export class DjaFormComponent implements OnInit {
   }
 
   processForm(e) {
-    this.awsPipe.submitMediaEntry(
+    //this.awsPipe.submitMediaEntry(
+    //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    //  this.APP_SETTINGS.settings.REGION,
+    //  this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
+    //  document.getElementById('video')['files'][0],
+    //  {
+    //        test: 'test12102'
+    //  },
+    //  'submission-entry'
+    //);
+    // 14da3a49-370d-737e-6ca5-2fc2d9c4eb53
+    //this.awsPipe.getTableEntry(
+    //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    //  this.APP_SETTINGS.settings.REGION,
+    //  'f4d1048a-125b-0dda-0e63-55efa9c19cd7',
+    //'submission-entry'
+    //);
+    //this.awsPipe.deleteTableItem(
+    //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    //  this.APP_SETTINGS.settings.REGION,
+    //  '14da3a49-370d-737e-6ca5-2fc2d9c4eb53',
+    //'submission-entry'
+    //);
+    //this.awsPipe.getEntireTable(
+    //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    //  this.APP_SETTINGS.settings.REGION,
+    //  'submission-entry'
+    //);
+    this.awsPipe.putTableEntry(
       this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
       this.APP_SETTINGS.settings.REGION,
-      this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
-      document.getElementById('video')['files'][0],
+      'a787440b-dd3d-3d27-f1b1-ceebbd37086f',
       {
-            test: 'test12102'
+                test: 'updated',
+                id:  'a787440b-dd3d-3d27-f1b1-ceebbd37086f'
       },
       'submission-entry'
     );
