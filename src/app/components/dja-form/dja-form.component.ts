@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import * as model from 'src/core.model';
@@ -6,85 +6,186 @@ import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
 import { S3Service } from 'src/app/services/s3.service';
+import { DynamoService } from '../../services/dynamoDb.service';
+import { AbstractControlStatus } from '@angular/forms/src/directives/ng_control_status';
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
   styleUrls: ['./dja-form.component.scss'],
-  providers: [ AppInternalSettings, FormBuilder, S3Service  ]
+  providers: [AppInternalSettings, FormBuilder, S3Service]
 })
 export class DjaFormComponent implements OnInit {
+  @ViewChild('video') video:  ElementRef;
   private countries: Array<string>;
   private languages: Array<string>;
-  
-  private formGroup :     FormGroup;
-  private fNameCtrl :     AbstractControl;
-  private lNameCtrl :     AbstractControl;
-  private emailCtrl :     AbstractControl;
-  private phoneCtrl :     AbstractControl;
-  private languageCtrl :  AbstractControl;
-  private countryCtrl :   AbstractControl;
+
+  private formGroup: FormGroup;
+  private fNameCtrl: AbstractControl;
+  private lNameCtrl: AbstractControl;
+  private emailCtrl: AbstractControl;
+  private phoneCtrl: AbstractControl;
+  private languageCtrl: AbstractControl;
+  private countryCtrl: AbstractControl;
+  private otherCountryCtrl: AbstractControl;
+
+  private otherPrimaryLanguage: Boolean;
+  private otherSecondaryLanguage: Boolean;
+  private controls: Array<string>;
+  constructor(
+    private APP_SETTINGS: AppInternalSettings,
+    private fb: FormBuilder,
+    private s3: S3Service,
+    private db: DynamoService
+  ) {
+    this.formGroup = this.makeForm();
+    this.countries = this.APP_SETTINGS.settings.COUNTRIES;
+    this.languages = this.APP_SETTINGS.settings.LANGUAGES;
+    this.fNameCtrl = this.formGroup.get('firstName');
+    this.lNameCtrl = this.formGroup.get('lastName');
+    this.emailCtrl = this.formGroup.get('contact_methods.phone');
+    this.phoneCtrl = this.formGroup.get('contact_methods.email');
+    this.languageCtrl = this.formGroup.get('language');
+    this.countryCtrl = this.formGroup.get('country');
+    this.otherCountryCtrl = this.formGroup.get('other_country');
+    this.controls = Object.keys(this.formGroup.controls);
 
 
-  constructor( private APP_SETTINGS : AppInternalSettings , private fb : FormBuilder, private s3 : S3Service) { 
-    this.formGroup      = this.makeForm();
-    this.countries      = this.APP_SETTINGS.settings.COUNTRIES;
-    this.languages      = this.APP_SETTINGS.settings.LANGUAGES;
-    this.fNameCtrl      = this.formGroup.controls.firstName;
-    this.lNameCtrl      = this.formGroup.controls.firstName;
-    this.emailCtrl      = this.formGroup.controls.firstName;
-    this.phoneCtrl      = this.formGroup.controls.firstName;
-    this.languageCtrl   = this.formGroup.controls.firstName;
-    this.countryCtrl    = this.formGroup.controls.firstName;
+    this.formGroup.get('languages.primary').valueChanges.subscribe(val => {
+
+      if (val == "Other") {
+        this.otherPrimaryLanguage = true
+        this.formGroup.get('laguages.other').setValidators(Validators.required);
+      } else {
+        this.otherPrimaryLanguage = false
+        this.formGroup.get('laguages.other').clearValidators();
+      }
+    })
+
+   
+
+    this.formGroup.get('travel_restriction').valueChanges.subscribe(val => {
+      if (val == 1) {
+        this.formGroup.get('travel_restriction_reason').setValidators(Validators.required);
+      } else {
+        this.formGroup.get('travel_restriction_reason').clearValidators();
+      }
+    });
+    this.formGroup.get('travel_restriction').valueChanges.subscribe(val => {
+      console.log(val)
+    })
   }
 
   ngOnInit() {
-    
+
+  }
+
+
+  processForm(e) {
+    //this.s3.putObject( document.getElementById("video")['files'][0]);
+    //this.db.putItem({
+    //  test: 'test22Bis'
+    //}, 'submission-entry');
+
+
+  }
+
+  ValidateLanguages(control: AbstractControl) {
+    return false
   }
   
-  videoChanged($e){
+  getExtension(filename) {
+    var parts = filename.split('.');
+    return parts[parts.length - 1];
+  }
+  ValidateFileType(control: AbstractControl){
+     if( !control.value.name ){
+       return null;
+     }
+      var ext = this.getExtension(control.value);
+      switch (ext.toLowerCase()) {
+      case 'm4v':
+      case 'avi':
+      case 'mpg':
+      case 'mp4':
+          // etc
+          return true;
+      }
+  }
+  ValidateFileSize( e ){
+    const fileSize = e.currentTarget.files[0].size;
+    const isValid : Boolean =  fileSize < 200000000;
+    let errors : any = {};
+    const fileName : String =  this.getExtension(e.currentTarget.files[0].name);
 
+    if ( !isValid ){
+     errors.file_size = 'video must be less than 200 megabytes.'
+    }
+
+      var ext = this.getExtension(fileName).toLowerCase();
+      if( ext != 'm4v' &&
+          ext != 'avi' && 
+          ext != 'mpeg' &&
+          ext != 'mov' &&
+          ext != 'mp4' 
+        ){  
+        errors.file_type = "select a video file"
+      }
+
+      if( errors.file_size || errors.file_type){
+        this.formGroup.get('video').setErrors(errors);
+      }else{
+        this.formGroup.get('video').setErrors(null);
+      }
   }
 
-  processForm(e){
-   this.s3.putObject( document.getElementById("video")['files'][0]); 
-  }
-  
-  makeForm( ) : FormGroup{
+  otherCountryValid() {
+    let valid = (this.formGroup.get('languages.other').dirty || this.formGroup.get('languages.other').touched) &&
+      !this.formGroup.get('languages.other').valid &&
+      (this.formGroup.get('languages.primary').value == 'Other' || this.formGroup.get('languages.secondary').value == 'Other')
+  };
 
+  getKeys(obj) {
+    const keys = Object.keys(obj)
+    return keys;
+  }
+
+  makeForm(): FormGroup {
     return this.fb.group({
       firstName: [
-        '', 
+        null,
         [Validators.required,
         Validators.minLength(2),
         Validators.maxLength(20)]
       ],
-      lastName:[
-        '', 
+      lastName: [
+        null,
         [Validators.required,
         Validators.minLength(2),
         Validators.maxLength(20)]
       ],
-      country: ['' , Validators.required],
+      dob: [null, Validators.required],
+      gender: [null, Validators],
+      country: [null, Validators.required],
+      other_country: [null],
       contact_methods: this.fb.group({
-        email: ['', Validators.compose([
-          Validators.required, 
-          Validators.email
-        ])],
-        phone: ['',Validators.compose([
-          Validators.required
-          //TODO - SET VALIDATOR FOR TELPHONE - Validators.pattern( ::: regex :::)
-       ])], 
-        whats_app: ["", Validators.required],
-        other: [""]
+        email: [null, Validators.compose([Validators.required, Validators.email])],
+        phone: [null, Validators.compose([Validators.required])],
+          //TODO - SET VALIDATOR FOR TELPHONE - Validators.pattern( ::: regex ::: )
+        whats_app: [null],
+        other: [null]
       }),
       languages: this.fb.group({
-        english: ['',Validators.compose([])],
-        french: [''],
-        portuguese: [''],
-        other: ['']
-      },
-      Validators.required),
-      video: ["", Validators.required] 
+        primary: [null, Validators.required],
+        secondary: [null],
+        other: [null]
+        },
+        {
+          validators: [Validators.required]
+      }),
+      travel_restriction: [false],
+      travel_restriction_reason: [null],
+      passport: [false],
+      video: [null]
     })
   }
 }
