@@ -18,19 +18,15 @@ export interface Country {
     other_country?: string; // becomes required if country === "Other"
 }
 
-export interface ContactMethod {
-    method: string;
-    other_method?: string; // becomes required if type === "Other"
+export enum ContactMethod {
+  Email = 'Email',
+  Phone = 'Phone',
+  WhatsApp = 'WhatsApp'
 }
 
 export interface ContactPoint {
     type: ContactMethod;
     value: string;
-}
-
-export interface ContactPoints {
-    primary: ContactPoint;
-    secondary?: ContactPoint;
 }
 
 export interface SubmissionEntry {
@@ -46,7 +42,7 @@ export interface SubmissionEntry {
     candidate_age: Number;
     valid_passport: boolean; // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction: TravelRestriction;
-    contact_points: ContactPoints;
+    contact_points: Array<ContactPoint>;
     user_id?: string;
     video_uri?: string;
     video_s3_key?: string;
@@ -55,12 +51,12 @@ export interface SubmissionEntry {
 }
 
 export enum EntryStatusType {
-  New,
-  PreRejected, // first pass rejected
-  PreApproved, // first pass approved
-  Selected, // finalist
-  Rejected, // rejected on subsequent passes
-  Standby // not a finalist, but not rejected either, on standby in case a finalist will not make it for whateever reason
+  New = 'New',
+  PreRejected = 'PreRejected', // first pass rejected
+  PreApproved = 'PreApproved', // first pass approved
+  Selected = 'Selected', // finalist
+  Rejected = 'Rejected', // rejected on subsequent passes
+  Standby = 'Standby' // not a finalist, but not rejected either, on standby in case a finalist will not make it for whateever reason
 }
 
 export interface EntryStatus {
