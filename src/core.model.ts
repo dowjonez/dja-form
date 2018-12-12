@@ -49,6 +49,7 @@ export interface SubmissionEntry {
     gender: string;
     spoken_languages: Languages;
     dob: Date;
+    candidate_age: Number;
     valid_passport: boolean; // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction: TravelRestriction;
     contact_points: ContactPoints;

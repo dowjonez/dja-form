@@ -20,6 +20,59 @@ export class DynamoService {
   ) {
   }
 
+  public getEntireTable (pool: string, region: string,  table_name: string) {
+    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    this.clearConfiguration();
+    this.awsService.configure(region, pool);
+    this.dynamodb = new AWS.DynamoDB();
+    this.documentClient = new AWS.DynamoDB.DocumentClient();
+    this.getTable(table_name);
+  }
+
+  public getTable (table_name: string) {
+    const self = this;
+    const params = {
+      TableName : table_name
+    };
+    this.documentClient.scan(params, function(err, data) {
+      if (err) {
+        console.error('Unable to read table.', JSON.stringify(err, null, 2));
+        self.interactionPipe.next( { key: 'readTableComplete', message: 'error' } );
+      } else {
+        console.log('Success', data);
+        self.interactionPipe.next( { key: 'readTableComplete', message: data } );
+      }
+    });
+  }
+
+  public getTableEntry (pool: string, region: string, key: string, table_name: string) {
+    // pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    this.clearConfiguration();
+    this.awsService.configure(region, pool);
+    this.dynamodb = new AWS.DynamoDB();
+    this.documentClient = new AWS.DynamoDB.DocumentClient();
+    this.getEntry(key, table_name);
+  }
+
+  private getEntry  (key: string, table_name: string) {
+    const self = this;
+    const params = {
+      TableName: table_name,
+      Key: {
+        'id': key
+      }
+    };
+
+    this.documentClient.get(params, function(err, data) {
+      if (err) {
+        console.error('Unable to read item.', JSON.stringify(err, null, 2));
+        self.interactionPipe.next( { key: 'readComplete', message: 'error' } );
+      } else {
+        console.log('Success', data);
+        self.interactionPipe.next( { key: 'readComplete', message: data } );
+      }
+    });
+  }
 
   public putTableEntry (pool: string, region: string, key: string, item: any, table_name: string) {
     this.clearConfiguration();
@@ -38,7 +91,7 @@ export class DynamoService {
 
   // generic, should be used directly only in special cases
   private putItem (key: string, item: any, table_name: string) {
-    item['id'] = key;
+    item['id'] = item['id'] ? item['id'] : key;
 
     const params = {
       TableName: table_name,
@@ -52,6 +105,35 @@ export class DynamoService {
       } else {
         console.log('Success', data);
         self.interactionPipe.next( { key: 'submissionComplete', message: 'success' } );
+      }
+    });
+  }
+
+  public deleteTableItem(pool: string, region: string, key: string, table_name: string) {
+    // pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    this.clearConfiguration();
+    this.awsService.configure(region, pool);
+    this.dynamodb = new AWS.DynamoDB();
+    this.documentClient = new AWS.DynamoDB.DocumentClient();
+    this.deleteItem(key, table_name);
+  }
+
+  private deleteItem(key: string, table_name: string) {
+    const self = this;
+    const params = {
+      TableName: table_name,
+      Key: {
+          'id': key
+      }
+    };
+
+    this.documentClient.delete(params, function(err, data) {
+      if (err) {
+        console.log('Error', err);
+        self.interactionPipe.next( { key: 'itemDeleted', message: 'error' } );
+      } else {
+        console.log('Success', data);
+        self.interactionPipe.next( { key: 'itemDeleted', message: 'success' } );
       }
     });
   }
