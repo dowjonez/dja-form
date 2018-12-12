@@ -100,24 +100,23 @@ export class DjaFormComponent implements OnInit, OnDestroy {
     //);
 
     const  entry = {
-      candidate_age: 45,
+      candidate_age: 25,
       spoken_languages: {
       primary: { language: 'English'},
       secondary: { language: 'French'}
       },
       country: { country: 'Ghana'},
-      create_time: new Date(),
+      create_time: new Date().toISOString(),
       first_name: 'Mata1',
       last_name: 'Hari',
       full_name: 'Mata1 Hari',
-      gender: 'Female',
+      gender: 'Male',
       travel_restriction: {
-        travel_restriction: true,
-        restriction_reason: 'Tra la la'
+        travel_restriction: false
       },
-      valid_passport: false,
+      valid_passport: true,
       id: null,
-      dob: new Date('March 21, 2012'),
+      dob: new Date('March 21, 2012').toISOString(),
       contact_points: {
         primary: {
           type:  { method: 'Email' },
@@ -127,7 +126,7 @@ export class DjaFormComponent implements OnInit, OnDestroy {
       },
       status: {
         status: EntryStatusType.New,
-        last_status_date: new Date()
+        last_status_date: new Date().toISOString()
       }
     } as SubmissionEntry;
 
