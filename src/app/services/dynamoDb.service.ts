@@ -3,6 +3,7 @@ import * as AWS from 'aws-sdk';
 import { Observable } from 'rxjs';
 import { AWSService } from './aws.service';
 import { EventInteraction } from './event.interaction.service';
+import { UUID } from 'angular2-uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -92,6 +93,7 @@ export class DynamoService {
   // generic, should be used directly only in special cases
   private putItem (key: string, item: any, table_name: string) {
     item['id'] = item['id'] ? item['id'] : key;
+    item['id'] = item['id'] ? item['id'] : UUID.UUID();
 
     const params = {
       TableName: table_name,

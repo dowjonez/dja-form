@@ -1,7 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
-import * as model from 'src/core.model';
+import {  SubmissionEntry, Language, Languages, TravelRestriction,
+          Country, ContactMethod, ContactPoint, ContactPoints, EntryStatusType,
+          EntryStatus, EntryStatusTrail, ManagedUser, VotingTeam
+        } from 'src/core.model';
 import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
@@ -95,14 +98,45 @@ export class DjaFormComponent implements OnInit, OnDestroy {
     //  this.APP_SETTINGS.settings.REGION,
     //  'submission-entry'
     //);
+
+    const  entry = {
+      candidate_age: 45,
+      spoken_languages: {
+      primary: { language: 'English'},
+      secondary: { language: 'French'}
+      },
+      country: { country: 'Ghana'},
+      create_time: new Date(),
+      first_name: 'Mata1',
+      last_name: 'Hari',
+      full_name: 'Mata1 Hari',
+      gender: 'Female',
+      travel_restriction: {
+        travel_restriction: true,
+        restriction_reason: 'Tra la la'
+      },
+      valid_passport: false,
+      id: null,
+      dob: new Date('March 21, 2012'),
+      contact_points: {
+        primary: {
+          type:  { method: 'Email' },
+          value: 'mata1@mata.mata'
+
+        }
+      },
+      status: {
+        status: EntryStatusType.New,
+        last_status_date: new Date()
+      }
+    } as SubmissionEntry;
+
+
     this.awsPipe.putTableEntry(
       this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
       this.APP_SETTINGS.settings.REGION,
-      'a787440b-dd3d-3d27-f1b1-ceebbd37086f',
-      {
-                test: 'updated',
-                id:  'a787440b-dd3d-3d27-f1b1-ceebbd37086f'
-      },
+      null,
+      entry,
       'submission-entry'
     );
   }

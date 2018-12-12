@@ -3,12 +3,6 @@ export interface Language {
     specify?: string; // becomes required if language === "Other"
 }
   ​
-
-export interface Language {
-    language: string;
-    specify?: string; // becomes required if language === "Other"
-}
-
 export interface Languages {
     primary: Language;
     secondary?: Language;
@@ -70,10 +64,10 @@ export enum EntryStatusType {
 }
 
 export interface EntryStatus {
-  id: string; // DynamoDb key
+  // id?: string; // DynamoDb key
   status: EntryStatusType; // required
   team?: VotingTeam; // null when 'New' becomes required otherwise
-  last_status_date: string;
+  last_status_date: Date;
 }
 
 export interface EntryStatusTrail {
