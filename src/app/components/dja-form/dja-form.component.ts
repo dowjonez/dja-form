@@ -98,18 +98,24 @@ export class DjaFormComponent implements OnInit, OnDestroy {
     //  this.APP_SETTINGS.settings.REGION,
     //  'submission-entry'
     //);
+    this.awsPipe.getFilteredTableEntries(
+      this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+      this.APP_SETTINGS.settings.REGION,
+      'submission-entry',
+      null
+    );
 
     const  entry = {
-      candidate_age: 25,
+      candidate_age: 34,
       spoken_languages: {
       primary: { language: 'English'},
       secondary: { language: 'French'}
       },
-      country: { country: 'Ghana'},
+      country: { country: 'Zimbabwe'},
       create_time: new Date().toISOString(),
-      first_name: 'Mata1',
+      first_name: 'Mata3',
       last_name: 'Hari',
-      full_name: 'Mata1 Hari',
+      full_name: 'Mata3 Hari',
       gender: 'Male',
       travel_restriction: {
         travel_restriction: false
@@ -117,13 +123,10 @@ export class DjaFormComponent implements OnInit, OnDestroy {
       valid_passport: true,
       id: null,
       dob: new Date('March 21, 2012').toISOString(),
-      contact_points: {
-        primary: {
-          type:  { method: 'Email' },
-          value: 'mata1@mata.mata'
-
-        }
-      },
+      contact_points: [{
+        type: ContactMethod.Email,
+        value: 'mata3@mata.com'
+      }],
       status: {
         status: EntryStatusType.New,
         last_status_date: new Date().toISOString()
@@ -131,13 +134,13 @@ export class DjaFormComponent implements OnInit, OnDestroy {
     } as SubmissionEntry;
 
 
-    this.awsPipe.putTableEntry(
-      this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
-      this.APP_SETTINGS.settings.REGION,
-      null,
-      entry,
-      'submission-entry'
-    );
+    //this.awsPipe.putTableEntry(
+    //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    //  this.APP_SETTINGS.settings.REGION,
+    //  null,
+    //  entry,
+    //  'submission-entry'
+    //);
   }
 
   makeForm( ) : FormGroup{
