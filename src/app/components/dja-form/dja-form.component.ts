@@ -2,7 +2,10 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy, LOCALE_ID } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
-import * as model from 'src/core.model';
+import {  SubmissionEntry, Language, Languages, TravelRestriction,
+          Country, ContactMethod, ContactPoint, EntryStatusType,
+          EntryStatus, EntryStatusTrail, ManagedUser, VotingTeam
+        } from 'src/core.model';
 import { AppInternalSettings } from 'src/app.settings';
 import { Validators } from '@angular/forms';
 import { S3 } from 'aws-sdk';
@@ -10,10 +13,7 @@ import { AbstractControlStatus } from '@angular/forms/src/directives/ng_control_
 import { EventInteraction } from '../../services/event.interaction.service';
 import { AWSEngine } from '../../services/aws.engine';
 import { Subscription } from 'rxjs';
-import {  SubmissionEntry, Language, Languages, TravelRestriction,
-  Country, ContactMethod, ContactPoint, ContactPoints, EntryStatusType,
-  EntryStatus, EntryStatusTrail, ManagedUser, VotingTeam
-} from 'src/core.model';
+
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
@@ -59,8 +59,8 @@ export class DjaFormComponent implements OnInit {
     this.formGroup = this.makeForm();
     this.countries = this.APP_SETTINGS.settings.COUNTRIES;
     this.languages = this.APP_SETTINGS.settings.LANGUAGES;
-    this.fNameCtrl = this.formGroup.get('firstName');
-    this.lNameCtrl = this.formGroup.get('lastName');
+    this.fNameCtrl = this.formGroup.get('first_name');
+    this.lNameCtrl = this.formGroup.get('last_name');
     this.emailCtrl = this.formGroup.get('contact_methods.phone');
     this.phoneCtrl = this.formGroup.get('contact_methods.email');
     this.languageCtrl = this.formGroup.get('language');
@@ -103,7 +103,7 @@ export class DjaFormComponent implements OnInit {
   }
 
   processForm(e) {
-    {
+    
     //this.awsPipe.submitMediaEntry(
     //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
     //  this.APP_SETTINGS.settings.REGION,
@@ -132,126 +132,81 @@ export class DjaFormComponent implements OnInit {
     //  this.APP_SETTINGS.settings.REGION,
     //  'submission-entry'
     //);
+    let langValue = this.formGroup.get('languages').value;
+    let languages : Languages = {
+      primary: langValue.primary.value
+    }
+
+  if (langValue.secondary && !langValue.other){
+    languages.secondary = langValue.secondary
+  }
+    
+  if (  langValue.other ){
+    if (  this.formGroup.get('languages.primary').value == 'Other'){
+      languages.primary  =  langValue.other.value
+    }else if ( langValue.other.value ){
+      languages.secondary  =  langValue.other.value
+    }
+  }
+
+  let contactKeys : Array<any> =  Object.keys( this.formGroup.get('contact_methods').value );
+  let contacts : Array<any> = [
+    {"type": ContactMethod.Email ,    'value': this.formGroup.get('contact_methods.email').value},
+    {"type": ContactMethod.Phone ,    'value': this.formGroup.get('contact_methods.phone').value},
+    {"type": ContactMethod.WhatsApp , 'value': this.formGroup.get('contact_methods.whats_app').value}
+  ];
+  
+  console.log( contacts )
+
+
+
+  const entry = {
+    create_time: Date.now(),
+    full_name: this.formGroup.get('first_name').value + " " + this.formGroup.get('last_name').value,
+    first_name:  this.formGroup.get('first_name').value,
+    last_name:  this.formGroup.get('last_name').value,
+    country: this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value,
+    gender:  this.formGroup.get('gender').value,
+    spoken_languages:  languages,
+    dob: new Date( ),
+  
+    valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
+    travel_restriction: this.formGroup.get('travel_restriction'),
+    
+    
+  }
+
+  this.awsPipe.submitMediaEntry(
+    this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
+    this.APP_SETTINGS.settings.REGION,
+    this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
+    this.video.nativeElement.files[0],
+    entry,
+    this.APP_SETTINGS.settings.ENTRY_TABLE_NAME
+  )
+
+
+
     //this.awsPipe.putTableEntry(
     //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
     //  this.APP_SETTINGS.settings.REGION,
-    //  'a787440b-dd3d-3d27-f1b1-ceebbd37086f',
-    //  {
-    //            test: 'updated',
-    //            id:  'a787440b-dd3d-3d27-f1b1-ceebbd37086f'
-    //  },
+    //  null,
+    //  entry,
     //  'submission-entry'
-    //
-    //}
-    
-    let langValue = this.formGroup.get('languages').value;
-      let languages : Languages = {
-        primary: langValue.primary.value
-      }
-
-    if (langValue.secondary && !langValue.other){
-      languages.secondary = langValue.secondary
-    }
-      
-    if (  langValue.other ){
-      if (  this.formGroup.get('languages.primary').value == 'Other'){
-        languages.primary  =  langValue.other.value
-      }else if ( langValue.other.value ){
-        languages.secondary  =  langValue.other.value
-      }
-    }
-
-    let contactKeys : Array<any> =  Object.keys( this.formGroup.get('contact_methods').value );
-    let contacts : Array<any> = [
-      {type: ContactMethod.Email,    this.formGroup.get('contact_methods.email').value},
-      {type: ContactMethod.Phone,    this.formGroup.get('contact_methods.phone').value},
-      {type: ContactMethod.WhatsApp, this.formGroup.get('contact_methods.whats_app').value}
-    ];
-    
-    console.log( contacts )
-
-
+    //);
   
-    const entry = {
-      create_time: Date.now(),
-      full_name: this.formGroup.get('first_name').value + " " + this.formGroup.get('last_name').value,
-      first_name:  this.formGroup.get('first_name').value,
-      last_name:  this.formGroup.get('last_name').value,
-      country: this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value,
-      gender:  this.formGroup.get('gender').value,
-      spoken_languages:  languages,
-      dob: new Date( ),
-    
-      valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
-      travel_restriction: this.formGroup.get('travel_restriction'),
-      
-      
-    }
-
-    this.awsPipe.submitMediaEntry(
-      this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
-      this.APP_SETTINGS.settings.REGION,
-      this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
-      this.video.nativeElement.files[0],
-      entry,
-      this.APP_SETTINGS.settings.ENTRY_TABLE_NAME
-    )
-  
-  }
 }
-  
-  getExtension(filename) {
-    var parts = filename.split('.');
-    return parts[parts.length - 1];
-  }
-  
-  ValidateFileSize( e ){
-    const fileSize = e.currentTarget.files[0].size;
-    const isValid : Boolean =  fileSize < 200000000;
-    let errors : any = {};
-    const fileName : String =  this.getExtension(e.currentTarget.files[0].name);
 
-    if ( !isValid ){
-     errors.file_size = 'video must be less than 200 megabytes.'
-    }
+  makeForm( ) : FormGroup{
 
-      var ext = this.getExtension(fileName).toLowerCase();
-      if( ext != 'm4v' &&
-          ext != 'avi' && 
-          ext != 'mpeg' &&
-          ext != 'mov' &&
-          ext != 'mp4' 
-        ){  
-        errors.file_type = "select a video file"
-      }
-
-      if( errors.file_size || errors.file_type){
-        this.formGroup.get('video').setErrors(errors);
-      }else{
-        this.formGroup.get('video').setErrors(null);
-      }
-  }
-
-  otherCountryValid() {
-    let valid = (this.formGroup.get('languages.other').dirty || this.formGroup.get('languages.other').touched) &&
-      !this.formGroup.get('languages.other').valid &&
-      (this.formGroup.get('languages.primary').value == 'Other' || this.formGroup.get('languages.secondary').value == 'Other')
-  };
-
-  getKeys(obj) {
-    const keys = Object.keys(obj)
-    return keys;
-  }
-
-  makeForm(): FormGroup {
     return this.fb.group({
-      firstName: [
+      first_name: [
         null,
         [Validators.required,
         Validators.minLength(2),
         Validators.maxLength(20)]
       ],
-      lastName: [
+      last_name: [
         null,
         [Validators.required,
         Validators.minLength(2),

@@ -67,6 +67,10 @@ export class AWSEngine {
     this.db.getEntireTable(pool, region, table_name);
   }
 
+  public getFilteredTableEntries (pool: string, region: string,  table_name: string, queryExpressions: any) {
+    this.db.getFilteredTableEntries(pool, region, table_name, queryExpressions);
+  }
+
   public deleteTableItem(pool: string, region: string, key: string, table_name: string) {
     this.db.deleteTableItem(pool, region, key, table_name);
   }
