@@ -1,39 +1,41 @@
 <form [formGroup]="formGroup" class="container">
-  <!-- NAME SECTION -->
-  <div class="row">
-    <p>Contestant</p>
-    <div class="input-group mb-3">
-      <input class="form-control" type="text" formControlName="firstName" placeholder="First Name" [ngClass]="{'is-invalid' : (fNameCtrl.dirty || fNameCtrl.touched) && !fNameCtrl.valid}" />
-      
-      <input class="form-control" type="text" formControlName="lastName" placeholder="Last Name" [ngClass]="{'is-invalid': (lNameCtrl.dirty || lNameCtrl.touched) && !lNameCtrl.valid}"/>
-    </div>
-  </div>
+    <!-- NAME SECTION -->
+    <div class="row">
+        <p>Contestant</p>
+        <div class="input-group mb-3">
+            <input class="form-control" type="text" formControlName="firstName" placeholder="First Name" [ngClass]="{'is-invalid' : (fNameCtrl.dirty || fNameCtrl.touched) && !fNameCtrl.valid}" />
 
-    
-  <div class="row form-group">
-    <div class="input-group">
-      <div class="input-group-prepend">
-            <label class="input-group-text">Date Of Birth</label>
-      </div>  
-      <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="dob" ngbDatepicker #d="ngbDatepicker">
-      <div class="input-group-append">
-        <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button"></button>
-      </div>
+            <input class="form-control" type="text" formControlName="lastName" placeholder="Last Name" [ngClass]="{'is-invalid': (lNameCtrl.dirty || lNameCtrl.touched) && !lNameCtrl.valid}" />
+        </div>
     </div>
-  </div>
-  
-        
-      <hr/>
+
+
+    <div class="row form-group">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text">Date Of Birth</label>
+            </div>
+            <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="dob" ngbDatepicker #d="ngbDatepicker">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <hr/>
 
 
     <!-- CONTACTS SECTION -->
     <ng-container formGroupName="contact_methods">
-      <div class="row">
-          <p>Contact Methods</p>
+        <div class="row">
+            <p>Contact Methods</p>
             <div class="input-group mb-3">
-                <input [ngClass]="{'is-invalid': (formGroup.get('contact_methods.email').dirty || formGroup.get('contact_methods.email').touched) && !formGroup.get('contact_methods.email').valid}" class="form-control" type="email" formControlName="email" placeholder="Email" />
+                <input [ngClass]="{'is-invalid': (formGroup.get('contact_methods.email').dirty || formGroup.get('contact_methods.email').touched) && !formGroup.get('contact_methods.email').valid}" class="form-control" type="email" formControlName="email" placeholder="Email"
+                />
 
-                <input class="form-control" type="tel" formControlName="phone" placeholder="Phone" [ngClass]="{'is-invalid' : (formGroup.get('contact_methods.phone').dirty || formGroup.get('contact_methods.phone').touched) && !formGroup.get('contact_methods.phone').valid}"/>
+                <input class="form-control" type="tel" formControlName="phone" placeholder="Phone" [ngClass]="{'is-invalid' : (formGroup.get('contact_methods.phone').dirty || formGroup.get('contact_methods.phone').touched) && !formGroup.get('contact_methods.phone').valid}"
+                />
             </div>
             <div class="input-group mb-3">
                 <input class="form-control" type="text" formControlName="whats_app" placeholder="Whats App Number" />
@@ -44,15 +46,15 @@
     </ng-container>
 
     <div class="row">
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text">Gender</label>
-        </div>
-        <select class="custom-select" formControlName="gender">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text">Gender</label>
+            </div>
+            <select class="custom-select" formControlName="gender">
             <option value="male">Male</option>
             <option value="female">Female</option>
         </select>
-      </div>
+        </div>
     </div>
     <hr/>
 
@@ -62,22 +64,22 @@
 
     <!-- LANGUAGES SECTION -->
     <div class="row">
-    <p>Spoken Languages</p>
-    <ng-container [formGroup]="formGroup.get('languages')" *ngIf="formGroup.get('languages') as langGroup">
+        <p>Spoken Languages</p>
+        <ng-container [formGroup]="formGroup.get('languages')" *ngIf="formGroup.get('languages') as langGroup">
             <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <label class="input-group-text">Primary</label>
-              </div>
-              <select class="custom-select" formControlName="primary" [ngClass]="{'is-invalid' : ( formGroup.get('languages.primary').touched || formGroup.get('languages.primary').dirty) && !formGroup.get('languages.primary').valid}">
+                <div class="input-group-prepend">
+                    <label class="input-group-text">Primary</label>
+                </div>
+                <select class="custom-select" formControlName="primary" [ngClass]="{'is-invalid' : ( formGroup.get('languages.primary').touched || formGroup.get('languages.primary').dirty) && !formGroup.get('languages.primary').valid}">
                 <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
                   <option value="{{item}}">{{item}}</option>
                 </ng-container>
               </select>
-            
-              <div class="input-group-prepend">
-                <label class="input-group-text">Secondary</label>
-              </div>
-              <select class="custom-select" formControlName="secondary">
+
+                <div class="input-group-prepend">
+                    <label class="input-group-text">Secondary</label>
+                </div>
+                <select class="custom-select" formControlName="secondary">
                 <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
                   <option value="{{item}}">{{item}}</option>
                 </ng-container>
@@ -103,31 +105,31 @@
 
     <!-- COUNTRY SECTION -->
     <div class="row">
-      <div class="input-group">
-        <div class="input-group-prepend">
-          <label class="input-group-text">Country</label>
-        </div>
-        <select class="custom-select" formControlName="country">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text">Country</label>
+            </div>
+            <select class="custom-select" formControlName="country">
           <ng-container *ngFor="let item of countries" >
             <option value="{{item}}">{{item}}</option>
           </ng-container>
         </select>
-      </div>
+        </div>
     </div>
-    
+
 
     <div class="row">
         <div class="input-group">
-        <ng-container [formGroup]="formGroup" *ngIf="formGroup.get('country').value=='Other'">
-            <input  class="form-control" [ngClass]="{'is-invalid': (otherCountryCtrl.dirty ||   otherCountryCtrl.touched) &&  !otherCountryCtrl.valid}"  type="text "   formControlName="other_country" placeholder="Other  Country" />
-            <!-- <ng-container *ngIf="(otherCountryCtrl.dirty || otherCountryCtrl.touched) &&   !otherCountryCtrl.valid"> 
+            <ng-container [formGroup]="formGroup" *ngIf="formGroup.get('country').value=='Other'">
+                <input class="form-control" [ngClass]="{'is-invalid': (otherCountryCtrl.dirty ||   otherCountryCtrl.touched) &&  !otherCountryCtrl.valid}" type="text " formControlName="other_country" placeholder="Other  Country" />
+                <!-- <ng-container *ngIf="(otherCountryCtrl.dirty || otherCountryCtrl.touched) &&   !otherCountryCtrl.valid"> 
                 *required
             </ng-container> -->
 
-        </ng-container>
-      </div>
+            </ng-container>
+        </div>
     </div>
-    
+
 
 
 
@@ -137,18 +139,14 @@
 
     <!-- VIDEO SECTION -->
     <div class="row">
-      <p>Video should be 720x1280 at 16:9 ratio and no longer than 2min long</p>
-      <div class="input-group">
-        <div class="custom-file">
-          <input type="file" formControlName="video" class="custom-file-input" id="validatedCustomFile"   (change)="ValidateFileSize($event)">
-          <label class="custom-file-label" for="validatedCustomFile" placeholder="">Choose File...</label>
-          <div class="invalid-feedback">Example invalid custom file feedback</div>
+        <p>Video should be 720x1280 at 16:9 ratio and no longer than 2min long</p>
+        <div class="input-group">
+            <div class="custom-file">
+                <input type="file" #video formControlName="video" class="custom-file-input" id="validatedCustomFile" (change)="ValidateFileSize($event)">
+                <label class="custom-file-label" for="validatedCustomFile" placeholder="">Choose File...</label>
+                <div class="invalid-feedback">Example invalid custom file feedback</div>
+            </div>
         </div>
-      </div>
-
-      {{formGroup.get('video').errors | json}}
-
-      
     </div>
 
 
@@ -159,53 +157,52 @@
 
 
 
-<div class="row">
-  <div class="input-group">
-    <!-- TRAVEL SECTION -->
-    <ng-container [formGroup]="formGroup">
-      <div class="custom-control custom-checkbox">
-        <input class="custom-control-input" id="customCheck1" type="checkbox" value="0" formControlName="travel_restriction" />
-        <label class="custom-control-label" for="customCheck1">Do you have any travel restrictions?</label>
-      </div>
+    <div class="row">
+        <div class="input-group">
+            <!-- TRAVEL SECTION -->
+            <ng-container [formGroup]="formGroup">
+                <div class="custom-control custom-checkbox">
+                    <input class="custom-control-input" id="customCheck1" type="checkbox" value="0" formControlName="travel_restriction" />
+                    <label class="custom-control-label" for="customCheck1">Do you have any travel restrictions?</label>
+                </div>
 
-        <ng-container *ngIf="formGroup.controls.travel_restriction">
-            <ng-container *ngIf="formGroup.get('travel_restriction').value==1 ">
-                <input type="text" class="form-control" formControlName="travel_restriction_reason" placeholder="reason for travel restriction" [ngClass]="{'is-invalid' : (formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid }"/>
-                
-                
-                <ng-container *ngIf="(formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid ">
-                    *required
+                <ng-container *ngIf="formGroup.controls.travel_restriction">
+                    <ng-container *ngIf="formGroup.get('travel_restriction').value==1 ">
+                        <input type="text" class="form-control" formControlName="travel_restriction_reason" placeholder="reason for travel restriction" [ngClass]="{'is-invalid' : (formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid }"
+                        />
+
+
+                        <ng-container *ngIf="(formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid ">
+                            *required
+                        </ng-container>
+
+                    </ng-container>
                 </ng-container>
-
             </ng-container>
-        </ng-container>
-    </ng-container>
-</div>
-</div>
-
-     <div class="row">
-       <div class="input-group">
-        <div class="custom-control custom-checkbox">
-          <input class="custom-control-input" type="checkbox" id="passport-checkbox"  value="0"   formControlName="passport"/>
-          <label class="custom-control-label" for="passport-checkbox">Do you own a valid passport?</label>
         </div>
-      </div>
+    </div>
+
+    <div class="row">
+        <div class="input-group">
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="passport-checkbox" value="0" formControlName="passport" />
+                <label class="custom-control-label" for="passport-checkbox">Do you own a valid passport?</label>
+            </div>
+        </div>
     </div>
 
 
-    <div class="submit-btn" class="btn" (click)="processForm($event)" [ngClass]="{'btn-disabled': !formGroup.valid, 'btn-primary': formGroup.valid}">SUBMIT</div> 
+    <div class="submit-btn" class="btn" (click)="processForm($event)" [ngClass]="{'btn-disabled': !formGroup.valid, 'btn-primary': formGroup.valid}">SUBMIT</div>
 
-    
-    <!-- <br />
-    <br />
-    <br /> 
-    
-    {{formGroup.get('video').error}}
-    <ng-container *ngFor="let item of getKeys(formGroup.getRawValue())">
-        <div class="row">
-            <div class="col-3">{{item}}</div>
-            <div class="col-2">{{formGroup.get(item).valid}}</div>
-            <div class="col-6">{{(formGroup.get(item).value | json)}}</div> <br />
-        </div>
-      </ng-container> -->
+
+    <!-- <br /> -->
+    <!-- <br /> -->
+    <!-- <br /> {{formGroup.get('video').error}} -->
+    <!-- <ng-container *ngFor="let item of getKeys(formGroup.getRawValue())"> -->
+    <!-- <div class="row"> -->
+    <!-- <div class="col-3">{{item}}</div> -->
+    <!-- <div class="col-2">{{formGroup.get(item).valid}}</div> -->
+    <!-- <div class="col-6">{{(formGroup.get(item).value | json)}}</div> <br /> -->
+    <!-- </div> -->
+    <!-- </ng-container> -->
 </form>

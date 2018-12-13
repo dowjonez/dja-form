@@ -9,6 +9,7 @@ export class AppInternalSettings {
         ANONYMOUS_POOL_ID: 'us-east-1:72e65e24-58b0-4d99-baa5-e35acdeb6d78',
         REGION: 'us-east-1',
         VIDEO_SUBMISSION_BUCKET: 'djafricashow-submissions',
+        ENTRY_TABLE_NAME: 'submission-entry',
         COUNTRIES: [
             'Algeria',
             'Angola',
