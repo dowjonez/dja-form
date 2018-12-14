@@ -23,9 +23,9 @@ import { createCustomElement } from '@angular/elements';
 })
 export class DjaFormComponent implements OnInit {
   @ViewChild('video') video;
-  public countries: Array<string>;
-  public languages: Array<string>;
- 
+  private countries: Array<string>;
+  private languages: Array<string>;
+
 
   public subscription: Subscription;
   public formGroup: FormGroup;
@@ -87,7 +87,7 @@ export class DjaFormComponent implements OnInit {
       }
     })
 
-   
+
 
     this.formGroup.get('travel_restriction').valueChanges.subscribe(val => {
       if (val == 1) {
@@ -154,7 +154,7 @@ export class DjaFormComponent implements OnInit {
   }
 
   processForm(e) {
-    
+
     //this.awsPipe.submitMediaEntry(
     //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
     //  this.APP_SETTINGS.settings.REGION,
@@ -191,7 +191,7 @@ export class DjaFormComponent implements OnInit {
   if (langValue.secondary && !langValue.other){
     languages.secondary = langValue.secondary
   }
-    
+
   if (  langValue.other ){
     if (  this.formGroup.get('languages.primary').value == 'Other'){
       languages.primary  =  langValue.other.value
@@ -206,7 +206,7 @@ export class DjaFormComponent implements OnInit {
     {"type": ContactMethod.Phone ,    'value': this.formGroup.get('contact_methods.phone').value},
     {"type": ContactMethod.WhatsApp , 'value': this.formGroup.get('contact_methods.whats_app').value}
   ];
-  
+
   console.log( contacts )
 
 
@@ -220,11 +220,11 @@ export class DjaFormComponent implements OnInit {
     gender:  this.formGroup.get('gender').value,
     spoken_languages:  languages,
     dob: new Date( ),
-  
+
     valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction: this.formGroup.get('travel_restriction'),
-    
-    
+
+
   }
 
   this.awsPipe.submitMediaEntry(
@@ -245,7 +245,7 @@ export class DjaFormComponent implements OnInit {
     //  entry,
     //  'submission-entry'
     //);
-  
+
 }
 
   makeForm( ) : FormGroup{
