@@ -28,7 +28,7 @@ export class S3Service {
         Bucket: bucket,
         Key: key,
         Body: file,
-        ACL: 'private', // NOT SURE IS NEEDED
+        //ACL: 'private', // NOT SURE IS NEEDED
         ContentType: file.type // NOT SURE IS NEEDED
       };
 

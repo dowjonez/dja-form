@@ -1,14 +1,26 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Form</title>
-  <base href="/">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+<head>
+    <meta charset="utf-8">
+    <title>Form</title>
+    <base href="/">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="final/css">
+
 </head>
+
 <body>
-  <app-root></app-root>
+
+    <app-root></app-root>
+
+    <script src="dist/form/final/form.js"></script>
+    <script>
+        document.getElementsByTagName('body')[0].appendChild(document.createElement('dja-form'));
+    </script>
 </body>
+
 </html>

@@ -6,7 +6,13 @@ import { AWSService } from './aws.service';
 import { EventInteraction } from './event.interaction.service';
 import { UUID } from 'angular2-uuid';
 import { Subscription } from 'rxjs';
+import { NgElement, WithProperties } from '@angular/elements';
 
+declare global {
+  interface HTMLElementTagNameMap {
+    'dja-form': NgElement & WithProperties<{}>;
+  }
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -14,6 +20,7 @@ export class AWSEngine {
   private subscription: any;
   private identityId: string;
 
+  
   constructor(
     private awsService: AWSService,
     private s3: S3Service,

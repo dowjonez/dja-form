@@ -1,5 +1,5 @@
 
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, LOCALE_ID } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, LOCALE_ID, Injector } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import {  SubmissionEntry, Language, Languages, TravelRestriction,
@@ -13,46 +13,53 @@ import { AbstractControlStatus } from '@angular/forms/src/directives/ng_control_
 import { EventInteraction } from '../../services/event.interaction.service';
 import { AWSEngine } from '../../services/aws.engine';
 import { Subscription } from 'rxjs';
+import { createCustomElement } from '@angular/elements';
 
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
   styleUrls: ['./dja-form.component.scss'],
-  providers: [AppInternalSettings, FormBuilder, { provide: LOCALE_ID, useValue: 'fr' },]
+  providers: [AppInternalSettings, FormBuilder, Validators]
 })
 export class DjaFormComponent implements OnInit {
   @ViewChild('video') video;
-  private countries: Array<string>;
-  private languages: Array<string>;
+  public countries: Array<string>;
+  public languages: Array<string>;
  
 
-  private subscription: Subscription;
-  private formGroup: FormGroup;
-  private fNameCtrl: AbstractControl;
-  private lNameCtrl: AbstractControl;
-  private emailCtrl: AbstractControl;
-  private phoneCtrl: AbstractControl;
-  private languageCtrl: AbstractControl;
-  private countryCtrl: AbstractControl;
-  private otherCountryCtrl: AbstractControl;
+  public subscription: Subscription;
+  public formGroup: FormGroup;
+  public fNameCtrl: AbstractControl;
+  public lNameCtrl: AbstractControl;
+  public emailCtrl: AbstractControl;
+  public phoneCtrl: AbstractControl;
+  public languageCtrl: AbstractControl;
+  public countryCtrl: AbstractControl;
+  public otherCountryCtrl: AbstractControl;
 
-  private otherPrimaryLanguage: Boolean;
-  private otherSecondaryLanguage: Boolean;
-  private controls: Array<string>;
+  public otherPrimaryLanguage: Boolean;
+  public otherSecondaryLanguage: Boolean;
+  public controls: Array<string>;
+  public interactionPipe: EventInteraction;
+  public awsPipe: AWSEngine;
   constructor(
-    private APP_SETTINGS : AppInternalSettings ,
-    private fb: FormBuilder,
-    public interactionPipe: EventInteraction,
-    private awsPipe: AWSEngine
+    public APP_SETTINGS : AppInternalSettings ,
+    public fb: FormBuilder,
+    interactionPipe: EventInteraction,
+    awsPipe: AWSEngine,
+    public injector : Injector
     ) {
+      
+    this.awsPipe = awsPipe;
+    this.interactionPipe = interactionPipe;
     const self = this;
     this.subscription = this.interactionPipe.subscribe(e => {
       if (e.key === 'submissionComplete') {
           if (e.message) {
-            // tell the user that everything is peachy
+            console.log(e.message)
           }
           else{
-            // tell the user to try again, maybe?
+            debugger
           }
       }
     });
@@ -93,6 +100,50 @@ export class DjaFormComponent implements OnInit {
       console.log(val)
     })
   }
+
+  getExtension(filename) {
+    var parts = filename.split('.');
+    return parts[parts.length - 1];
+  }
+  
+  ValidateFileSize( e ){
+    const fileSize = e.currentTarget.files[0].size;
+    const isValid : Boolean =  fileSize < 200000000;
+    let errors : any = {};
+    const fileName : String =  this.getExtension(e.currentTarget.files[0].name);
+
+    if ( !isValid ){
+     errors.file_size = 'video must be less than 200 megabytes.'
+    }
+
+      var ext = this.getExtension(fileName).toLowerCase();
+      if( ext != 'm4v' &&
+          ext != 'avi' && 
+          ext != 'mpeg' &&
+          ext != 'mov' &&
+          ext != 'mp4' 
+        ){  
+        errors.file_type = "select a video file"
+      }
+
+      if( errors.file_size || errors.file_type){
+        this.formGroup.get('video').setErrors(errors);
+      }else{
+        this.formGroup.get('video').setErrors(null);
+      }
+  }
+
+  otherCountryValid() {
+    let valid = (this.formGroup.get('languages.other').dirty || this.formGroup.get('languages.other').touched) &&
+      !this.formGroup.get('languages.other').valid &&
+      (this.formGroup.get('languages.primary').value == 'Other' || this.formGroup.get('languages.secondary').value == 'Other')
+  };
+
+  getKeys(obj) {
+    const keys = Object.keys(obj)
+    return keys;
+  }
+
 
   ngOnInit() {
 
@@ -198,6 +249,7 @@ export class DjaFormComponent implements OnInit {
 }
 
   makeForm( ) : FormGroup{
+
 
     return this.fb.group({
       first_name: [
