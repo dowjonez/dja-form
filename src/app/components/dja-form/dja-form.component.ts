@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import {  SubmissionEntry, Language, Languages, TravelRestriction,
-          Country, ContactMethod, ContactPoint, ContactPoints, EntryStatusType,
+          Country, ContactMethod, ContactPoint, EntryStatusType,
           EntryStatus, EntryStatusTrail, ManagedUser, VotingTeam
         } from 'src/core.model';
 import { AppInternalSettings } from 'src/app.settings';
@@ -98,11 +98,14 @@ export class DjaFormComponent implements OnInit, OnDestroy {
     //  this.APP_SETTINGS.settings.REGION,
     //  'submission-entry'
     //);
+    const qDef = this.awsPipe.getQueryDef('age_range');
+    qDef.feVals[':start_age'] = 10;
+    qDef.feVals[':end_age'] = 79;
     this.awsPipe.getFilteredTableEntries(
       this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
       this.APP_SETTINGS.settings.REGION,
-      'submission-entry',
-      null
+      this.APP_SETTINGS.settings.ENTRY_TABLE_NAME,
+      qDef
     );
 
     const  entry = {
@@ -112,7 +115,7 @@ export class DjaFormComponent implements OnInit, OnDestroy {
       secondary: { language: 'French'}
       },
       country: { country: 'Zimbabwe'},
-      create_time: new Date().toISOString(),
+      submission_date: new Date().toISOString(),
       first_name: 'Mata3',
       last_name: 'Hari',
       full_name: 'Mata3 Hari',

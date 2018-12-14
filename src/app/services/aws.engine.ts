@@ -4,6 +4,7 @@ import { S3Service } from './s3.service';
 import { DynamoService } from './dynamoDb.service';
 import { AWSService } from './aws.service';
 import { EventInteraction } from './event.interaction.service';
+import { DdbQueryDef, DdbInternalSettings } from './ddb.settings';
 import { UUID } from 'angular2-uuid';
 import { Subscription } from 'rxjs';
 
@@ -18,6 +19,7 @@ export class AWSEngine {
     private awsService: AWSService,
     private s3: S3Service,
     private db: DynamoService,
+    private ddbSettings: DdbInternalSettings,
     public interactionPipe: EventInteraction
   ) {
     const self = this;
@@ -38,6 +40,13 @@ export class AWSEngine {
     });
   }
 
+  public getQueryNames(): Array<string> {
+    return this.ddbSettings.settings.QUERY_NAMES;
+  }
+
+  public getQueryDef(name: string): DdbQueryDef {
+    return this.ddbSettings.settings.QUERIES[name] as DdbQueryDef;
+  }
 
   public newId() {
     return UUID.UUID();
@@ -77,6 +86,14 @@ export class AWSEngine {
 
   public putTableEntry (pool: string, region: string, key: string, item: any, table_name: string) {
     this.db.putTableEntry(pool, region, key, item, table_name);
+  }
+
+  public today() {
+    return this.db.today();
+  }
+
+  public dateString(date: Date) {
+    return this.db.dateString(date);
   }
 
 }

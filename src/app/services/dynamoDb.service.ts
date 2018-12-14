@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { AWSService } from './aws.service';
 import { EventInteraction } from './event.interaction.service';
 import { UUID } from 'angular2-uuid';
-import { query } from '@angular/core/src/render3';
+import { DdbQueryDef, DdbInternalSettings } from './ddb.settings';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,7 @@ export class DynamoService {
 
   constructor(
     private awsService: AWSService,
+    private ddbSettings: DdbInternalSettings,
     public interactionPipe: EventInteraction
   ) {
   }
@@ -48,10 +49,10 @@ export class DynamoService {
   }
 
   public getFilteredTableEntries (pool: string, region: string,  table_name: string, queryExpressions: any) {
-    //if (!queryExpressions) {
-    //  this.getEntireTable(pool, region, table_name);
-    //  return;
-    //}
+    if (!queryExpressions) {
+      this.getEntireTable(pool, region, table_name);
+      return;
+    }
     pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
@@ -60,63 +61,18 @@ export class DynamoService {
     this.getFilteredTable(table_name, queryExpressions);
   }
 
-  private getFilteredTable (table_name: string, queryExpressions: any) {
+  private getFilteredTable (table_name: string, queryExpressions: DdbQueryDef) {
     const self = this;
-
-    // AGE FILTER
-    // const eqAgeFe = 'candidate_age = :age';
-    // const eqAgeFeVal = { ':age': 34 };
-
-    // AGE RANGE FILTER
-    // const rangeAgeFe = 'candidate_age between :start_age and :end_age';
-    // const rangeAgeFeVal = {
-    //  ':start_age': 31,
-    //  ':end_age': 66
-    // };
-
-    // TRAVEL RESTRITIONS FILTER
-    // const eqTrFe = 'travel_restriction.travel_restriction = :val';
-    // const eqTrFeVal = { ':val': true };
-
-    // LANGUAGE FILTER - as 'primary' is as reserved word we have to use aliases here
-    // const eqLangFe = '#sl.#prim.#lang = :lang or #sl.#sec.#lang = :lang';
-    // const eqLangFeVal = { ':lang': 'French' };
-    // const ean = {
-    //   '#sl':  'spoken_languages', '#sec':  'secondary' , '#prim': 'primary', '#lang': 'language'
-    // };
-
-    // COUNTRY FILTER
-    // const eqCntrFe = 'country.country = :val';
-    // const eqCntrFeVal = { ':val': 'Zimbabwe' };
-
-    // GENDER FILTER
-    // const eqGenFe = 'gender = :gen';
-    // const eqGenFeVal = { ':gen' : 'Male' };
-
-    // VALID PASSPORT FILTER
-    // const eqVpFe = 'valid_passport = :val';
-    // const eqVpFeVal = { ':val': true };
-
-    // ENTRY STATUS FILTER
-    // const eqStsFe = '#st1.#st2 = :stat';
-    // const eqStsFeVal =  { ':stat': 'New' };
-    // const ean = {
-    //  '#st1':  'status', '#st2':  'status'
-    // };
-
-    // ENTRY STATUS & LANGUAGE FILTER - this is the more complex query, or evaluated before and and reserved keywords inconvenience
-    const eqLangStsFe = '(#sl.#prim.#lang = :lang or #sl.#sec.#lang = :lang) and  #st1.#st2 = :stat';
-    const eqLangStsFeVal = { ':lang': 'French',  ':stat': 'New'};
-    const ean = {
-       '#sl':  'spoken_languages', '#sec':  'secondary' , '#prim': 'primary', '#lang': 'language', '#st1':  'status', '#st2':  'status'
-    };
-
-    const params = {
+    let params: any;
+     params = {
       TableName : table_name,
-      FilterExpression : eqLangStsFe,
-      ExpressionAttributeValues: eqLangStsFeVal,
-      ExpressionAttributeNames: ean
+      FilterExpression : queryExpressions.fe,
+      ExpressionAttributeValues: queryExpressions.feVals,
+      Limit: this.ddbSettings.settings.DATASET_LIMIT
     };
+    if (queryExpressions.feAliases) {
+      params.ExpressionAttributeNames = queryExpressions.feAliases;
+    }
     this.documentClient.scan(params, function(err, data) {
       if (err) {
         console.error('Unable to read table.', JSON.stringify(err, null, 2));
@@ -129,7 +85,7 @@ export class DynamoService {
   }
 
   public getTableEntry (pool: string, region: string, key: string, table_name: string) {
-    // pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -176,7 +132,8 @@ export class DynamoService {
   private putItem (key: string, item: any, table_name: string) {
     item['id'] = item['id'] ? item['id'] : key;
     item['id'] = item['id'] ? item['id'] : UUID.UUID();
-
+    // when replace create_date exists already
+    item['create_date'] = item['create_date'] ? item['create_date'] : this.today();
     const params = {
       TableName: table_name,
       Item: item
@@ -194,7 +151,7 @@ export class DynamoService {
   }
 
   public deleteTableItem(pool: string, region: string, key: string, table_name: string) {
-    // pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -220,5 +177,16 @@ export class DynamoService {
         self.interactionPipe.next( { key: 'itemDeleted', message: 'success' } );
       }
     });
+  }
+
+  public today() {
+    return this.dateString(new Date());
+  }
+
+  public dateString(date: Date) {
+    const dd = date.getDate();
+    const mm = date.getMonth(); // January is 0!
+    const yyyy = date.getFullYear();
+    return new Date(yyyy, mm, dd, 0, 0, 0).toDateString();
   }
 }
