@@ -6,7 +6,7 @@ import { AppInternalSettings } from 'src/app.settings';
 import { FormGroup, FormControl, FormControlName, FormBuilder, ReactiveFormsModule } from "@angular/forms";
 import { DjaFormComponent } from './components/dja-form/dja-form.component';
 import { AWSServicesModule } from '../app/services/module/services.module';
-
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 @NgModule({
   declarations: [
     AppComponent,
@@ -16,7 +16,8 @@ import { AWSServicesModule } from '../app/services/module/services.module';
   imports: [
     BrowserModule,
     ReactiveFormsModule,
-    AWSServicesModule
+    AWSServicesModule,
+    NgbModule
   ],
   providers: [ AppInternalSettings ],
   bootstrap: [AppComponent]
