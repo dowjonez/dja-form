@@ -48,7 +48,7 @@ export class DjaFormComponent implements OnInit {
   public controls: Array<string>;
   public interactionPipe: EventInteraction;
   public awsPipe: AWSEngine;
-  @Input() percentUploaded : Number;
+  @Input() percentUploaded : Number = 0;
   @Input() submissionComplete : Number;
   @Input() formStatus: string = "open";
   @Input() buttonText: string = "Sign Up Now!"
@@ -74,7 +74,7 @@ export class DjaFormComponent implements OnInit {
             this.formStatus = 'submissionComplete';
           }
           else{
-            debugger
+          
           }
       }
 
@@ -118,9 +118,7 @@ export class DjaFormComponent implements OnInit {
         this.formGroup.get('travel_restriction_reason').clearValidators();
       }
     });
-    this.formGroup.get('travel_restriction').valueChanges.subscribe(val => {
-
-    })
+  
 
     this.setupProgressBar()
   }
@@ -271,7 +269,10 @@ export class DjaFormComponent implements OnInit {
     dob: dobParams.dob,
     candidate_age: dobParams.age,
     valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
-    travel_restriction: this.formGroup.get('travel_restriction').value,
+    travel_restriction:   { 
+      travel_restriction: this.formGroup.get('travel_restriction').value,
+      restriction_reason: this.formGroup.get('travel_restriction_reason').value
+    },
 
 
   }
