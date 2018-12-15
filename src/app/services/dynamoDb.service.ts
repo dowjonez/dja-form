@@ -5,6 +5,7 @@ import { AWSService } from './aws.service';
 import { EventInteraction } from './event.interaction.service';
 import { UUID } from 'angular2-uuid';
 import { DdbQueryDef, DdbInternalSettings } from './ddb.settings';
+import { EntryStatus, EntryStatusType } from '../../core.model';
 
 @Injectable({
   providedIn: 'root'
@@ -128,12 +129,20 @@ export class DynamoService {
     }
   }
 
+
   // generic, should be used directly only in special cases
   private putItem (key: string, item: any, table_name: string) {
     item['id'] = item['id'] ? item['id'] : key;
     item['id'] = item['id'] ? item['id'] : UUID.UUID();
     // when replace create_date exists already
-    item['create_date'] = item['create_date'] ? item['create_date'] : this.today();
+    item['submission_date'] = item['submission_date'] ? item['submission_date'] : this.today();
+    if (!item['status']) {
+      item['status'] = {
+        status: EntryStatusType.New,
+        last_status_date: item['submission_date']
+      } as EntryStatus;
+    }
+
     const params = {
       TableName: table_name,
       Item: item
