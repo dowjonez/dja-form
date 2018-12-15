@@ -58,8 +58,9 @@ export class S3Service {
 
   private put(pool: string, region: string, params, item: any, table_name: string) {
     const self = this;
+
     // THIS ERRORS !!!
-    this.s3.upload(params, function( err, data: AWS.S3.ManagedUpload.SendData ) {
+    let request = this.s3.upload(params, function( err, data: AWS.S3.ManagedUpload.SendData ) {
       if (err) {
         console.log('Error', err);
       } else {
@@ -76,6 +77,13 @@ export class S3Service {
         // the WRONG old way commented out below
         // self.getSignedUrl(pool, region, params.Key, params.Bucket, item, table_name);
       }
+    }).on('httpUploadProgress', function(evt) {
+      let percentLoaded = evt.loaded / evt.total * 100;
+      self.interactionPipe.next( { key: 'percent_uploaded', message: percentLoaded });
     });
+
+    //send(function(err, data) {
+    //  self.interactionPipe.next( { key: 'percent_loaded', message: percentLoaded });
+    //});
   }
 }

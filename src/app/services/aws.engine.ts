@@ -7,13 +7,7 @@ import { EventInteraction } from './event.interaction.service';
 import { DdbQueryDef, DdbInternalSettings } from './ddb.settings';
 import { UUID } from 'angular2-uuid';
 import { Subscription } from 'rxjs';
-import { NgElement, WithProperties } from '@angular/elements';
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'dja-form': NgElement & WithProperties<{}>;
-  }
-}
 @Injectable({
   providedIn: 'root'
 })
@@ -32,7 +26,7 @@ export class AWSEngine {
     const self = this;
     this.subscription = this.interactionPipe.subscribe(e => {
       if (e.key === 'videoAccepted') {
-          console.log(e.message);
+
           const ddbKey = e.message.item['id'] ? e.message.item['id'] : this.newId();
           e.message.item['video_uri'] = e.message.uri;
           e.message.item['video_s3_key'] = e.message.key;

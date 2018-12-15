@@ -1,5 +1,5 @@
 
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, LOCALE_ID, Injector } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, LOCALE_ID, Injector, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormControlName, AbstractControl } from '@angular/forms';
 import { fbind } from 'q';
 import {  SubmissionEntry, Language, Languages, TravelRestriction,
@@ -13,8 +13,15 @@ import { AbstractControlStatus } from '@angular/forms/src/directives/ng_control_
 import { EventInteraction } from '../../services/event.interaction.service';
 import { AWSEngine } from '../../services/aws.engine';
 import { Subscription } from 'rxjs';
-import { createCustomElement } from '@angular/elements';
+import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
+import { NgbModal, ModalDismissReasons,NgbProgressbarConfig } from '@ng-bootstrap/ng-bootstrap';
 
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'dja-form': NgElement & WithProperties<{"openModal"}>;
+  }
+}
 @Component({
   selector: 'dja-form',
   templateUrl: './dja-form.component.html',
@@ -23,10 +30,10 @@ import { createCustomElement } from '@angular/elements';
 })
 export class DjaFormComponent implements OnInit {
   @ViewChild('video') video;
+  @ViewChild('formTemplate') formTemplate;
+  private closeResult: string;
   private countries: Array<string>;
   private languages: Array<string>;
-
-
   public subscription: Subscription;
   public formGroup: FormGroup;
   public fNameCtrl: AbstractControl;
@@ -36,33 +43,49 @@ export class DjaFormComponent implements OnInit {
   public languageCtrl: AbstractControl;
   public countryCtrl: AbstractControl;
   public otherCountryCtrl: AbstractControl;
-
   public otherPrimaryLanguage: Boolean;
   public otherSecondaryLanguage: Boolean;
   public controls: Array<string>;
   public interactionPipe: EventInteraction;
   public awsPipe: AWSEngine;
+  @Input() percentUploaded : Number;
+  @Input() submissionComplete : Number;
+  @Input() formStatus: string = "open";
+  @Input() buttonText: string = "Sign Up Now!"
+  @Input() submissionSuccessMessage: string = "Congratulations! We've recieved your video submission.  If you are selected to be a contestant on DJAfrica, we will contact you via one of the means of contact that you listed. Thank you!"
+  public isUploadActive : boolean;
   constructor(
     public APP_SETTINGS : AppInternalSettings ,
     public fb: FormBuilder,
     interactionPipe: EventInteraction,
     awsPipe: AWSEngine,
-    public injector : Injector
+    public injector : Injector,
+    private modalService: NgbModal,
+    public progressBarConfig : NgbProgressbarConfig
     ) {
       
-    this.awsPipe = awsPipe;
-    this.interactionPipe = interactionPipe;
-    const self = this;
+      this.awsPipe = awsPipe;
+      this.interactionPipe = interactionPipe;
+      const self = this;
+      
     this.subscription = this.interactionPipe.subscribe(e => {
       if (e.key === 'submissionComplete') {
           if (e.message) {
-            console.log(e.message)
+            this.formStatus = 'submissionComplete';
           }
           else{
             debugger
           }
       }
+
+      if (e.key = "percent_uploaded"){
+        
+        this.percentUploaded = Math.floor(e.message);
+      }
     });
+
+
+
     this.formGroup = this.makeForm();
     this.countries = this.APP_SETTINGS.settings.COUNTRIES;
     this.languages = this.APP_SETTINGS.settings.LANGUAGES;
@@ -77,7 +100,6 @@ export class DjaFormComponent implements OnInit {
 
 
     this.formGroup.get('languages.primary').valueChanges.subscribe(val => {
-
       if (val == "Other") {
         this.otherPrimaryLanguage = true
         this.formGroup.get('languages.other').setValidators(Validators.required);
@@ -97,8 +119,38 @@ export class DjaFormComponent implements OnInit {
       }
     });
     this.formGroup.get('travel_restriction').valueChanges.subscribe(val => {
-      console.log(val)
+
     })
+
+    this.setupProgressBar()
+  }
+
+  public openModal() {
+    
+    if( !this.modalService.hasOpenModals()){
+          
+      this.modalService.open(this.formTemplate).result.then((result) => {
+        this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      }); 
+    }
+  }
+  private setupProgressBar(){
+    this.progressBarConfig.max = 100;
+      this.progressBarConfig.animated = true;
+      this.progressBarConfig.showValue = true;
+      this.progressBarConfig.striped = true;
+  }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return  `with: ${reason}`;
+    }
   }
 
   getExtension(filename) {
@@ -207,17 +259,17 @@ export class DjaFormComponent implements OnInit {
     {"type": ContactMethod.WhatsApp , 'value': this.formGroup.get('contact_methods.whats_app').value}
   ];
 
-  console.log( contacts )
+
 
 
 
   const entry = {
     create_time: Date.now(),
-    full_name: this.formGroup.get('first_name').value + " " + this.formGroup.get('last_name').value,
-    first_name:  this.formGroup.get('first_name').value,
-    last_name:  this.formGroup.get('last_name').value,
-    country: this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value,
-    gender:  this.formGroup.get('gender').value,
+    full_name:         this.formGroup.get('first_name').value + " " + this.formGroup.get('last_name').value,
+    first_name:        this.formGroup.get('first_name').value,
+    last_name:         this.formGroup.get('last_name').value,
+    country:           this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value,
+    gender:            this.formGroup.get('gender').value,
     spoken_languages:  languages,
     dob: new Date( ),
 
@@ -231,7 +283,7 @@ export class DjaFormComponent implements OnInit {
     this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
     this.APP_SETTINGS.settings.REGION,
     this.APP_SETTINGS.settings.VIDEO_SUBMISSION_BUCKET,
-    this.video.nativeElement.files[0],
+    document.querySelector('#validatedCustomFile')['files'][0],
     entry,
     this.APP_SETTINGS.settings.ENTRY_TABLE_NAME
   )
@@ -246,6 +298,7 @@ export class DjaFormComponent implements OnInit {
     //  'submission-entry'
     //);
 
+    this.formStatus = 'uploadActive';
 }
 
   makeForm( ) : FormGroup{
@@ -290,10 +343,18 @@ export class DjaFormComponent implements OnInit {
     })
   }
 
+
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
+  }
+  ngAfterViewInit(){
+    
+    // this.form.emit("formCreated",{
+    //
+    //
+    // })
   }
 }

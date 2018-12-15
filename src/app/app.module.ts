@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule, InjectionToken, Injector } from '@angular/core';
+import { NgModule, InjectionToken, Injector,ApplicationRef } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import * as model from 'src/core.model';
 import { AppComponent } from './app.component';
@@ -9,7 +9,9 @@ import { DjaFormComponent } from './components/dja-form/dja-form.component';
 import { AWSServicesModule } from '../app/services/module/services.module';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { EventInteraction } from './services/event.interaction.service';
+import { NgElement, WithProperties } from '@angular/elements';
 import { AWSEngine } from './services/aws.engine';
+
 
 @NgModule({
   declarations: [
@@ -31,11 +33,12 @@ export class AppModule {
   
   constructor ( private injector : Injector ){
       this.injector = injector;
+      const djaForm = createCustomElement(DjaFormComponent, {injector: this.injector});
+      customElements.define('dja-form', djaForm);
   }
 
-  ngDoBootstrap(){
-    const djaForm = createCustomElement(DjaFormComponent, {injector: this.injector});
-    customElements.define('dja-form', djaForm)
+  ngDoBootstrap(ApplicationRef){
+   
   };
 }
 
