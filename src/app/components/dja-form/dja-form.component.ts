@@ -158,12 +158,12 @@ export class DjaFormComponent implements OnInit {
 
   ValidateFileSize( e ){
     const fileSize = e.currentTarget.files[0].size;
-    const isValid : Boolean =  fileSize < 200000000;
+    const isValid : Boolean =  fileSize < 314572800;
     let errors : any = {};
     const fileName : String =  this.getExtension(e.currentTarget.files[0].name);
 
     if ( !isValid ){
-     errors.file_size = 'video must be less than 200 megabytes.'
+     errors.file_size = 'video must be less than 300 megabytes.'
     }
 
       var ext = this.getExtension(fileName).toLowerCase();
@@ -204,7 +204,6 @@ export class DjaFormComponent implements OnInit {
   }
 
   processForm(e) {
-
     //this.awsPipe.submitMediaEntry(
     //  this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
     //  this.APP_SETTINGS.settings.REGION,
@@ -235,21 +234,21 @@ export class DjaFormComponent implements OnInit {
     //);
     let langValue = this.formGroup.get('languages').value;
     let languages : Languages = {
-      primary: langValue.primary
+      primary: { 
+       'language':  langValue.primary
+      },
+      secondary:{
+        'language': langValue.secondary
+      }
     }
 
-  if (langValue.secondary && !langValue.other){
-    languages.secondary = langValue.secondary
-  }
+    if (languages.primary.language == "Other" && langValue.other)
+      languages.primary.specify = langValue.other;
+    else if (languages.secondary.language == "Other" && langValue.other)
+      languages.secondary.specify = langValue.other;
 
-  if (  langValue.other ){
-    if (  this.formGroup.get('languages.primary').value == 'Other'){
-      languages.primary  =  langValue.other.value
-    }else if ( langValue.other.value ){
-      languages.secondary  =  langValue.other.value
-    }
-  }
 
+    
   let contactKeys : Array<any> =  Object.keys( this.formGroup.get('contact_methods').value );
   let contacts : Array<any> = [
     {"type": ContactMethod.Email ,    'value': this.formGroup.get('contact_methods.email').value},
@@ -271,10 +270,11 @@ export class DjaFormComponent implements OnInit {
     valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction:   { 
       travel_restriction: this.formGroup.get('travel_restriction').value,
-      restriction_reason: this.formGroup.get('travel_restriction_reason').value
-    },
+    }
 
-
+  }
+  if( this.formGroup.get('travel_restriction').value == 1 ){
+    entry.travel_restriction = this.formGroup.get('travel_restriction').value;
   }
 
   this.awsPipe.submitMediaEntry(
@@ -329,8 +329,8 @@ export class DjaFormComponent implements OnInit {
         Validators.maxLength(20)]
       ],
       dob: [null, Validators.required],
-      gender: [null, Validators.required],
-      country: [null, Validators.required],
+      gender: [null, [Validators.required, Validators.minLength(2)]],
+      country: [null, [Validators.required, Validators.minLength(2)]],
       other_country: [null],
       contact_methods: this.fb.group({
         email: [null, Validators.compose([Validators.required, Validators.email])],
@@ -340,8 +340,8 @@ export class DjaFormComponent implements OnInit {
         other: [null]
       }),
       languages: this.fb.group({
-        primary: [null, Validators.required],
-        secondary: [null],
+        primary: [null, [Validators.required, Validators.minLength(2)]],
+        secondary: [null,[Validators.required, Validators.minLength(2)]],
         other: [null]
         },
         {

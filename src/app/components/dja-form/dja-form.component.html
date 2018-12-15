@@ -1,10 +1,10 @@
 <ng-container>
-    <div class="outer-form-container">
+    <div [ngClass]="{'remove-bg': submissionComplete}" class="outer-form-container">
         <div class="btn btn-primary" (click)="openModal()">
             {{buttonText}}
         </div>
         <ng-template #formTemplate let-modal>
-            <div #formTemplate class="modal-header form-container">
+            <div class="modal-header form-container">
                 <ng-container *ngIf="formStatus == 'submissionComplete'">
                     <div class="modal-header">
                         <h4>{{submissionSuccessMessage}}</h4>
@@ -53,9 +53,10 @@
                                         <label class="input-group-text">Gender</label>
                                     </div>
                                     <select class="custom-select" formControlName="gender">
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-            </select>
+                                        <option value=""></option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -98,23 +99,25 @@
                                         <div class="input-group-prepend">
                                             <label class="input-group-text">Primary</label>
                                         </div>
-                                        <select  #firstlanguage class="custom-select" formControlName="primary" [ngClass]="{'is-invalid' : ( formGroup.get('languages.primary').touched || formGroup.get('languages.primary').dirty) && !formGroup.get('languages.primary').valid}">
-                <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
-                  <option value="{{item}}">{{item}}</option>
-                </ng-container>
-              </select>
+                                        <select #firstlanguage class="custom-select" formControlName="primary" [ngClass]="{'is-invalid' : ( formGroup.get('languages.primary').touched || formGroup.get('languages.primary').dirty) && !formGroup.get('languages.primary').valid}">
+                                            <option value=""></option>
+                                            <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
+                                                <option value="{{item}}">{{item}}</option>
+                                            </ng-container>
+                                        </select>
                                     </div>
                                     <div class="input-group col-12 col-sm-6  mb-3">
                                         <div class="input-group-prepend">
                                             <label class="input-group-text">Secondary</label>
                                         </div>
                                         <select class="custom-select" formControlName="secondary">
-                <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
-                    <ng-container *ngIf="formGroup.get('languages.primary') && formGroup.get('languages.primary').value != item">
-                        <option value="{{item}}" >{{item}}</option>
-                    </ng-container>
-                </ng-container>
-              </select>
+                                            <option value=""></option>
+                                            <ng-container [formGroup]="formGroup.controls.languages" *ngFor="let item of languages" >
+                                                <ng-container *ngIf="formGroup.get('languages.primary') && formGroup.get('languages.primary').value != item">
+                                                    <option value="{{item}}" >{{item}}</option>
+                                                </ng-container>
+                                            </ng-container>
+                                        </select>
                                     </div>
 
                                     <div class="input-group col-12 col-sm-6 mb-3">
@@ -143,10 +146,11 @@
                                         <label class="input-group-text">Country</label>
                                     </div>
                                     <select class="custom-select" formControlName="country">
-          <ng-container *ngFor="let item of countries" >
-            <option value="{{item}}">{{item}}</option>
-          </ng-container>
-        </select>
+                                        <option value=""></option>
+                                        <ng-container *ngFor="let item of countries" >
+                                          <option value="{{item}}">{{item}}</option>
+                                        </ng-container>
+                                    </select>
                                 </div>
                             </div>
 
@@ -156,9 +160,8 @@
                                     <ng-container [formGroup]="formGroup" *ngIf="formGroup.get('country').value=='Other'">
                                         <input class="form-control" [ngClass]="{'is-invalid': (otherCountryCtrl.dirty ||   otherCountryCtrl.touched) &&  !otherCountryCtrl.valid}" type="text " formControlName="other_country" placeholder="Other  Country" />
                                         <!-- <ng-container *ngIf="(otherCountryCtrl.dirty || otherCountryCtrl.touched) &&   !otherCountryCtrl.valid"> 
-                *required
-            </ng-container> -->
-
+                                            *required
+                                        </ng-container> -->
                                     </ng-container>
                                 </div>
                             </div>
@@ -176,8 +179,8 @@
                                     <p>Video should be 720x1280 at 16:9 ratio and no longer than 2min long</p>
                                     <div class="input-group">
                                         <div class="custom-file">
-                                            <input type="file" #video formControlName="video" class="custom-file-input" id="validatedCustomFile" (change)="ValidateFileSize($event)">
-                                            <label class="custom-file-label" for="validatedCustomFile" placeholder="">Choose File...</label>
+                                            <input #file type="file" #video formControlName="video" class="custom-file-input" id="validatedCustomFile" (change)="ValidateFileSize($event)">
+                                            <label class="custom-file-label" for="validatedCustomFile" placeholder="">{{file.value}}</label>
                                             <div class="invalid-feedback">Example invalid custom file feedback</div>
                                         </div>
                                     </div>
