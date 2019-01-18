@@ -15,6 +15,7 @@ import { AWSEngine } from '../../services/aws.engine';
 import { Subscription } from 'rxjs';
 import { createCustomElement, NgElement, WithProperties } from '@angular/elements';
 import { NgbModal, ModalDismissReasons,NgbProgressbarConfig } from '@ng-bootstrap/ng-bootstrap';
+import { controlNameBinding } from '@angular/forms/src/directives/reactive_directives/form_control_name';
 
 
 declare global {
@@ -232,15 +233,16 @@ export class DjaFormComponent implements OnInit {
     //  this.APP_SETTINGS.settings.REGION,
     //  'submission-entry'
     //);
+
     let langValue = this.formGroup.get('languages').value;
     let languages : Languages = {
       primary: { 
        'language':  langValue.primary
-      },
+      } as Language,
       secondary:{
         'language': langValue.secondary
-      }
-    }
+      } as Language
+    };
 
     if (languages.primary.language == "Other" && langValue.other)
       languages.primary.specify = langValue.other;
@@ -251,9 +253,9 @@ export class DjaFormComponent implements OnInit {
     
   let contactKeys : Array<any> =  Object.keys( this.formGroup.get('contact_methods').value );
   let contacts : Array<any> = [
-    {"type": ContactMethod.Email ,    'value': this.formGroup.get('contact_methods.email').value},
-    {"type": ContactMethod.Phone ,    'value': this.formGroup.get('contact_methods.phone').value},
-    {"type": ContactMethod.WhatsApp , 'value': this.formGroup.get('contact_methods.whats_app').value}
+    {"type": ContactMethod.Email ,    'value': this.formGroup.get('contact_methods.email').value} as ContactPoint,
+    {"type": ContactMethod.Phone ,    'value': this.formGroup.get('contact_methods.phone').value}  as ContactPoint,
+    {"type": ContactMethod.WhatsApp , 'value': this.formGroup.get('contact_methods.whats_app').value} as ContactPoint
   ];
   const dobParams = this.dobString(this.formGroup.get('dob').value);
 
@@ -262,7 +264,9 @@ export class DjaFormComponent implements OnInit {
     full_name:         this.formGroup.get('first_name').value + " " + this.formGroup.get('last_name').value,
     first_name:        this.formGroup.get('first_name').value,
     last_name:         this.formGroup.get('last_name').value,
-    country:           this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value,
+    country:           {
+      country: this.formGroup.get('country').value != "Other" ? this.formGroup.get('country').value :  this.formGroup.get('other_country').value 
+    },
     gender:            this.formGroup.get('gender').value,
     spoken_languages:  languages,
     dob: dobParams.dob,
@@ -270,12 +274,19 @@ export class DjaFormComponent implements OnInit {
     valid_passport: this.formGroup.get('passport').value, // would rephrase the question: Do you own a valid passport issued by your country?
     travel_restriction:   { 
       travel_restriction: this.formGroup.get('travel_restriction').value,
-    }
+    } as TravelRestriction,
+    contact_methods:    contacts
 
   }
   if( this.formGroup.get('travel_restriction').value == 1 ){
     entry.travel_restriction = this.formGroup.get('travel_restriction').value;
   }
+
+  if (entry.travel_restriction ){
+    entry.travel_restriction.restriction_reason = this.formGroup.get('travel_restriction').value;
+  }
+
+
 
   this.awsPipe.submitMediaEntry(
     this.APP_SETTINGS.settings.ANONYMOUS_POOL_ID,
@@ -312,9 +323,17 @@ export class DjaFormComponent implements OnInit {
       return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
-  makeForm( ) : FormGroup{
-
-
+  ValidateDate(control:FormControl){
+    let date  = control.value;
+    if (!date)
+      return;
+    if( date['year'] && date['day']&& date['month']){
+      return null
+    }else if ( !date['year'] || !date['day'] || !date['month'] ){
+      return {invalidDate: true}
+    }
+  }
+  makeForm( ) : FormGroup{ 
     return this.fb.group({
       first_name: [
         null,
@@ -328,7 +347,7 @@ export class DjaFormComponent implements OnInit {
         Validators.minLength(2),
         Validators.maxLength(20)]
       ],
-      dob: [null, Validators.required],
+      dob: [null, [Validators.required, this.ValidateDate]],
       gender: [null, [Validators.required, Validators.minLength(2)]],
       country: [null, [Validators.required, Validators.minLength(2)]],
       other_country: [null],
@@ -341,7 +360,7 @@ export class DjaFormComponent implements OnInit {
       }),
       languages: this.fb.group({
         primary: [null, [Validators.required, Validators.minLength(2)]],
-        secondary: [null,[Validators.required, Validators.minLength(2)]],
+        secondary: [null,[ Validators.minLength(2)]],
         other: [null]
         },
         {

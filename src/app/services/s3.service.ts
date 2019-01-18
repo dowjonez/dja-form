@@ -40,7 +40,7 @@ export class S3Service {
     this.s3.getSignedUrl('getObject',
       { Bucket: bucket, Key: key}, function( err, data ) {
       if (err) {
-        console.log('Error', err);
+        //console.log('Error', err);
       } else {
         const interactionMessage = {
           uri: data,
@@ -51,7 +51,7 @@ export class S3Service {
           tableName: table_name
         };
         self.interactionPipe.next( { key: 'videoAccepted', message: interactionMessage } );
-        console.log('Success', data);
+        //console.log('Success', data);
       }
     });
   }
@@ -62,9 +62,9 @@ export class S3Service {
     // THIS ERRORS !!!
     let request = this.s3.upload(params, function( err, data: AWS.S3.ManagedUpload.SendData ) {
       if (err) {
-        console.log('Error', err);
+        //console.log('Error', err);
       } else {
-        console.log('Success', data);
+        //console.log('Success', data);
         const interactionMessage = {
           uri: data.Location,
           pool: pool,

@@ -30,10 +30,10 @@ export class AWSService {
     const self = this;
     credentials.get(function(err) {
       if (err) {
-          console.log('Error'  + err);
+        //  console.log('Error'  + err);
           return;
       }
-      console.log('Cognito Identity Id: ' + credentials.identityId);
+      //
       self.interactionPipe.next( { key: 'Credentials', message: credentials.identityId } );
     });
   }

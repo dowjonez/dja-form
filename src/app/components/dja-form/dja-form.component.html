@@ -1,6 +1,6 @@
 <ng-container>
     <div [ngClass]="{'remove-bg': submissionComplete}" class="outer-form-container">
-        <div class="btn btn-primary" (click)="openModal()">
+        <div class="btn btn-primary sign-up-button" (click)="openModal()">
             {{buttonText}}
         </div>
         <ng-template #formTemplate let-modal>
@@ -22,7 +22,7 @@
                 <div class="modal-body">
 
                     <ng-container *ngIf="formStatus =='open'">
-                        <form [formGroup]="formGroup" class="container modal-body">
+                        <form [formGroup]="formGroup" class="container modal-body" (ngSubmit)="processForm()">
                             <!-- NAME SECTION -->
                             <p>Contestant</p>
                             <div class="row">
@@ -33,7 +33,6 @@
                                 <div class="col-12 col-sm-6 mb-3">
                                     <input class="form-control" type="text" formControlName="last_name" placeholder="Last Name" [ngClass]="{'is-invalid': (lNameCtrl.dirty || lNameCtrl.touched) && !lNameCtrl.valid}" />
                                 </div>
-
                             </div>
 
 
@@ -42,25 +41,28 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text sm">Date Of Birth</label>
                                     </div>
-                                    <input class="form-control" placeholder="yyyy-mm-dd" name="dp" formControlName="dob" ngbDatepicker #d="ngbDatepicker" [maxDate]="{year: 2000, month: 12, day: 15}" [minDate]="{year: 1960, month: 01, day: 1}">
+                                    <input class="form-control" [ngClass]="{'is-invalid' : (formGroup.get('dob').dirty || formGroup.get('dob').touched) && !formGroup.get('dob').valid}" placeholder="yyyy-mm-dd" name="dp" formControlName="dob" ngbDatepicker #d="ngbDatepicker" [maxDate]="{year: 2000, month: 12, day: 15}"
+                                        [minDate]="{year: 1960, month: 01, day: 1}">
                                     <div class="input-group-append">
                                         <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button"></button>
                                     </div>
                                 </div>
+                                <!-- <ng-container *ngIf="(formGroup.get('dob').dirty || formGroup.get('dob').touched) && !formGroup.get('dob').valid ">
+                                    <div class="required">*required</div>
+                                </ng-container> -->
+
 
                                 <div class="input-group col-12 col-sm-6">
                                     <div class="input-group-prepend">
                                         <label class="input-group-text">Gender</label>
                                     </div>
-                                    <select class="custom-select" formControlName="gender">
+                                    <select class="custom-select" formControlName="gender" [ngClass]="{'is-invalid' : (formGroup.get('gender').dirty || formGroup.get('gender').touched) && !formGroup.get('gender').valid}">
                                         <option value=""></option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                     </select>
                                 </div>
                             </div>
-
-
                             <hr/>
 
 
@@ -84,7 +86,6 @@
                                 </div>
 
                             </ng-container>
-
                             <hr/>
 
 
@@ -122,22 +123,13 @@
 
                                     <div class="input-group col-12 col-sm-6 mb-3">
                                         <input type="text" class="form-control" *ngIf="langGroup.get('primary').value == 'Other' || langGroup.get('secondary').value == 'Other'" formControlName="other" placeholder="Other Language" />
-                                        <ng-container *ngIf="(langGroup.get('other').dirty || langGroup.get('other').touched) && !langGroup.get('other').valid && (formGroup.get('languages.primary').value=='Other' || formGroup.get('languages.secondary').value == 'Other')">
+                                        <!-- <ng-container *ngIf="(langGroup.get('other').dirty || langGroup.get('other').touched) && !langGroup.get('other').valid && (formGroup.get('languages.primary').value=='Other' || formGroup.get('languages.secondary').value == 'Other')">
                                             *required
-                                        </ng-container>
+                                        </ng-container> -->
                                     </div>
                                 </ng-container>
                             </div>
-
                             <hr/>
-
-
-
-
-
-
-
-
 
                             <!-- COUNTRY SECTION -->
                             <div class="row">
@@ -145,7 +137,7 @@
                                     <div class="input-group-prepend">
                                         <label class="input-group-text">Country</label>
                                     </div>
-                                    <select class="custom-select" formControlName="country">
+                                    <select class="custom-select" formControlName="country" [ngClass]="{'is-invalid' : (formGroup.get('country').dirty || formGroup.get('country').touched) && !formGroup.get('country').valid}">
                                         <option value=""></option>
                                         <ng-container *ngFor="let item of countries" >
                                           <option value="{{item}}">{{item}}</option>
@@ -167,19 +159,13 @@
                             </div>
 
 
-
-
-
-
-
-
                             <!-- VIDEO SECTION -->
                             <div class="row mb-4">
                                 <div class="col-12">
                                     <p>Video should be 720x1280 at 16:9 ratio and no longer than 2min long</p>
                                     <div class="input-group">
                                         <div class="custom-file">
-                                            <input #file type="file" #video formControlName="video" class="custom-file-input" id="validatedCustomFile" (change)="ValidateFileSize($event)">
+                                            <input #file type="file" #video formControlName="video" class="custom-file-input" id="validatedCustomFile" (change)="ValidateFileSize($event)" [ngClass]="{'is-invalid' : (formGroup.get('video').dirty || formGroup.get('video').touched) && !formGroup.get('video').valid}">
                                             <label class="custom-file-label" for="validatedCustomFile" placeholder="">{{file.value}}</label>
                                             <div class="invalid-feedback">Example invalid custom file feedback</div>
                                         </div>
@@ -189,14 +175,7 @@
 
 
 
-
-
-
-
-
-
                             <div class="row mb-3">
-
                                 <div class="input-group">
                                     <!-- TRAVEL SECTION -->
                                     <ng-container [formGroup]="formGroup">
@@ -215,9 +194,9 @@
                                             <div>
                                                 <input type="text" class="form-control" formControlName="travel_restriction_reason" placeholder="reason for travel restriction" [ngClass]="{'is-invalid' : (formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid }"
                                                 />
-                                                <ng-container *ngIf="(formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid ">
+                                                <!-- <ng-container *ngIf="(formGroup.get('travel_restriction_reason').dirty || formGroup.get('travel_restriction_reason').touched) && !formGroup.get('travel_restriction_reason').valid ">
                                                     *required
-                                                </ng-container>
+                                                </ng-container> -->
                                             </div>
 
                                         </ng-container>
@@ -233,20 +212,10 @@
                                 </div>
                             </div>
 
+                            {{formGroup.valid}}
 
-                            <div class="submit-btn" class="btn" (click)="processForm($event)" [ngClass]="{'btn-disabled': !formGroup.valid, 'btn-primary': formGroup.valid}">SUBMIT</div>
+                            <button (click)="processForm()" type="submit" class="submit-btn what-the-fuck" class="btn" [attr.disabled]="!formGroup.valid ? 'disabled': null" [ngClass]="{'btn-disabled': !formGroup.valid, 'btn-primary': formGroup.valid}"> SUBMIT</button>
 
-
-                            <!-- <br /> -->
-                            <!-- <br /> -->
-                            <!-- <br /> {{formGroup.get('video').error}} -->
-                            <!-- <ng-container *ngFor="let item of getKeys(formGroup.getRawValue())"> -->
-                            <!-- <div class="row"> -->
-                            <!-- <div class="col-3">{{item}}</div> -->
-                            <!-- <div class="col-2">{{formGroup.get(item).valid}}</div> -->
-                            <!-- <div class="col-6">{{(formGroup.get(item).value | json)}}</div> <br /> -->
-                            <!-- </div> -->
-                            <!-- </ng-container> -->
                         </form>
                     </ng-container>
 

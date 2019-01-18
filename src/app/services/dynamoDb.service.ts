@@ -25,7 +25,7 @@ export class DynamoService {
   }
 
   public getEntireTable (pool: string, region: string,  table_name: string) {
-    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    //pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -40,10 +40,10 @@ export class DynamoService {
     };
     this.documentClient.scan(params, function(err, data) {
       if (err) {
-        console.error('Unable to read table.', JSON.stringify(err, null, 2));
+        //console.error('Unable to read table.', JSON.stringify(err, null, 2));
         self.interactionPipe.next( { key: 'readTableComplete', message: 'error' } );
       } else {
-        console.log('Success', data);
+        //console.log('Success', data);
         self.interactionPipe.next( { key: 'readTableComplete', message: data } );
       }
     });
@@ -54,7 +54,7 @@ export class DynamoService {
       this.getEntireTable(pool, region, table_name);
       return;
     }
-    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    //pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -76,17 +76,17 @@ export class DynamoService {
     }
     this.documentClient.scan(params, function(err, data) {
       if (err) {
-        console.error('Unable to read table.', JSON.stringify(err, null, 2));
+    //console.error('Unable to read table.', JSON.stringify(err, null, 2));
         self.interactionPipe.next( { key: 'readTableComplete', message: 'error' } );
       } else {
-        console.log('Success', data);
+    //console.log('Success', data);
         self.interactionPipe.next( { key: 'readTableComplete', message: data } );
       }
     });
   }
 
   public getTableEntry (pool: string, region: string, key: string, table_name: string) {
-    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    //pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -105,10 +105,10 @@ export class DynamoService {
 
     this.documentClient.get(params, function(err, data) {
       if (err) {
-        console.error('Unable to read item.', JSON.stringify(err, null, 2));
+    //console.error('Unable to read item.', JSON.stringify(err, null, 2));
         self.interactionPipe.next( { key: 'readComplete', message: 'error' } );
       } else {
-        console.log('Success', data);
+    //console.log('Success', data);
         self.interactionPipe.next( { key: 'readComplete', message: data } );
       }
     });
@@ -150,17 +150,17 @@ export class DynamoService {
     const self = this;
     this.documentClient.put(params, function(err, data) {
       if (err) {
-        console.log('Error', err);
+    //console.log('Error', err);
         self.interactionPipe.next( { key: 'submissionComplete', message: 'error' } );
       } else {
-        console.log('Success', data);
+    //console.log('Success', data);
         self.interactionPipe.next( { key: 'submissionComplete', message: 'success' } );
       }
     });
   }
 
   public deleteTableItem(pool: string, region: string, key: string, table_name: string) {
-    pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
+    //pool = 'us-east-1:277993d3-58e9-4b2d-9aa4-c3fe9de0343a';
     this.clearConfiguration();
     this.awsService.configure(region, pool);
     this.dynamodb = new AWS.DynamoDB();
@@ -178,11 +178,9 @@ export class DynamoService {
     };
 
     this.documentClient.delete(params, function(err, data) {
-      if (err) {
-        console.log('Error', err);
+      if (err) {  //console.log('Error', err);
         self.interactionPipe.next( { key: 'itemDeleted', message: 'error' } );
-      } else {
-        console.log('Success', data);
+      } else {  //console.log('Success', data);
         self.interactionPipe.next( { key: 'itemDeleted', message: 'success' } );
       }
     });
